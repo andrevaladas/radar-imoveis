@@ -23,7 +23,7 @@ public enum TipoImovel {
             }
 		}
 
-        System.out.println("| WARN: TipoImovel n�o encontrado para a descri��o: " + description);
+        System.out.println("| WARN: TipoImovel não encontrado para a descrição: " + description);
         return NA;
     }
 }

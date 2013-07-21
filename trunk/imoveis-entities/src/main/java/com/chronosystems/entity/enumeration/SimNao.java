@@ -1,7 +1,7 @@
 package com.chronosystems.entity.enumeration;
 
 public enum SimNao {
-	S("Sim"), N("N�o");
+	S("Sim"), N("Não");
 
 	private String description;
 

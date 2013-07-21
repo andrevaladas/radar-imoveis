@@ -1,7 +1,7 @@
 package com.chronosystems.entity.enumeration;
 
 public enum SiteBusca {
-	PENSE_IMOVEIS("Pense Im�veis"), AUXILIADORA("Auxiliadora Predial");
+	PENSE_IMOVEIS("Pense Imóveis"), AUXILIADORA("Auxiliadora Predial");
 
 	private String description;
 

@@ -28,7 +28,7 @@ import com.chronosystems.entity.enumeration.TipoLocalizacao;
 /**
  * Classe Imovel
  * 
- * @author Andr� Valadas
+ * @author Andre Valadas
  */
 @Entity
 public class Imovel implements Serializable {
