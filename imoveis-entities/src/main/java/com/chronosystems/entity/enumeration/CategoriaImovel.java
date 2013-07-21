@@ -4,7 +4,7 @@ package com.chronosystems.entity.enumeration;
  *
  */
 public enum CategoriaImovel {
-	NO("Novo"), US("Usado"), LA("Lan�amento"), NA("Desconhecido");
+	NO("Novo"), US("Usado"), LA("Lançamento"), NA("Desconhecido");
 
 	private String description;
 	private CategoriaImovel(final String description) {
@@ -25,7 +25,7 @@ public enum CategoriaImovel {
             }
 		}
 
-		System.out.println("| WARN: CategoriaImovel n�o encontrado para a descri��o: " + description);
+		System.out.println("| WARN: CategoriaImovel não encontrado para a descrição: " + description);
         return NA;
     }
 }
