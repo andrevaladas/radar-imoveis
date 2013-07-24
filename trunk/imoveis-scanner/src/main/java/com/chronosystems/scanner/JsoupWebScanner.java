@@ -241,8 +241,11 @@ public class JsoupWebScanner {
 	 * Execute parse html extractor
 	 */
 	public void execute() {
-		try {
+		/** ThreadPool */
+		final ExecutorService executor = Executors.newFixedThreadPool(10);
 
+		try {
+			
 			/** properiedades da busca */
 			final Set<Entry<Estado, Map<TipoImovel, String>>> searchProperties = getURLConnect().entrySet();
 			for (final Entry<Estado, Map<TipoImovel, String>> search : searchProperties) {
@@ -263,7 +266,6 @@ public class JsoupWebScanner {
 					final Integer totalPages = getTotalPages(doc);
 					debug(totalPages.toString());
 
-					final ExecutorService executor = Executors.newFixedThreadPool(10);
 					info("total de paginas: "+totalPages);
 
 					/** busca em todas as paginas da consulta */
@@ -274,7 +276,7 @@ public class JsoupWebScanner {
 						/** carrega proxima pagina */
 						if (i > 1) {
 							doc = Jsoup.parse(new URL(entry.getValue()+"?page="+i).openStream(), "ISO-8859-1", entry.getValue()+"?page="+i);
-							break;
+							//break;
 						}
 						
 						/** elements to iterate */
@@ -314,6 +316,14 @@ public class JsoupWebScanner {
 		} catch (Exception e) {
 			error(e.getMessage());
 			e.printStackTrace();
+		} finally {
+			executor.shutdown();
+			/* waiting for all tasks to complete */
+			while(!executor.isTerminated()) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) { }
+			}
 		}
 	}
 

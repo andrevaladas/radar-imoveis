@@ -1,122 +1,253 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8">
-    <title>Bootstrap, from Twitter</title>
+    <meta charset="ISO-8859-1">
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
+    <title>Radar Im&oacute;veis</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="Mapa de Im&oacute;veis">
+    <meta name="author" content="Chrono Systems">
 
-    <!-- Bootstrap -->
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-    </style>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="https://developers.google.com/maps/documentation/javascript/examples/default.css" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
 
-    <!-- Fav and touch icons -->
-    <!-- 
-    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
-    -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobubble/src/infobubble.js"></script>
+
+    <script src="/js/classes/imoveis.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    	var map;
+    	var $imoveisList = [];
+
+    	$(document).ready(function(){
+    		/** carrega dados da consulta */
+    		loadDataImoveis();
+
+    		/** inicializa mapa */
+    		initialize();
+
+    		/** adiciona marcadores no mapa */
+			loadMarkers();
+    	});
+
+    	/** popula dados dos imoveis filtrados */
+    	function loadDataImoveis() {
+			<c:forEach items="${imovelList}" var="data" varStatus="status">
+				// popula objeto imovel
+				var $imovel = new Imovel();
+				$imovel.setId('${data.id}');
+				$imovel.setUrlAnuncio('${data.urlAnuncio}');
+				$imovel.setCodigoAnuncio('${data.codigoAnuncio}');
+				$imovel.setTituloResumo('${data.tituloResumo}');
+				$imovel.setCaracteristicasResumo('${data.caracteristicasResumo}');
+				$imovel.setDescricaoResumo('${data.descricaoResumo}');
+				$imovel.setImgDestaque('${data.imgDestaque}');
+				$imovel.setValor('${data.valor}');
+
+				//localizacao
+				$imovel.getLocalizacao().setEndereco('${data.endereco}');
+				$imovel.getLocalizacao().setLatitude('${data.latitude}');
+				$imovel.getLocalizacao().setLongitude('${data.longitude}');
+				$imovel.getLocalizacao().setTipoLocalizacao('${data.tipoLocalizacao}');
+
+				//add imovel
+				$imoveisList.push($imovel);
+			</c:forEach>
+    	}
+
+    	/** carrega assincronamente os marcadores no mapa */
+    	function loadMarkers() {
+			for (var i = 0; i < $imoveisList.length; i++) {
+				var $imovel = $imoveisList[i];
+				/** adicona marcador */
+				addMarker($imovel);
+			}
+    	}
+
+    	/** add marker */
+    	function addMarker($imovel) {
+			var $marker = new google.maps.Marker({
+		    	position: $imovel.getLocalizacao().getLatLng(),
+		    	title: $imovel.getCodigoAnuncio(),
+		    	map: map,
+		    	draggable: false,
+		    	animation: google.maps.Animation.DROP,
+		    	imovel: $imovel,
+		    	icon : '/img/markers/home-'+$imovel.getLocalizacao().getTipoLocalizacao()+'.png'
+		  	});
+
+			/** click do marker */
+			google.maps.event.addListener($marker, 'click', function(event) {
+				//toggleBounce(this);
+
+				//show info
+				var infoBubble = new InfoBubble({
+					maxWidth: 400,
+					maxHeight: 400
+					/*map: map,
+					content: content,
+					position: event.latLng,
+					shadowStyle: 0,
+					padding: 10,
+					borderRadius: 10,
+					borderWidth: 1,
+					borderColor: '#ccc',
+					backgroundColor: '#fff',
+					maxWidth: 200,
+					maxHeight: 50,
+					arrowSize: 10,
+					arrowPosition: 50,
+					disableAutoPan: true,
+					arrowStyle: 2*/
+			    });
+
+				var div = document.createElement('DIV');
+		        div.innerHTML = this.imovel.mostraValores();
+
+		        //adiciona tabs de informações
+		        infoBubble.addTab(' Im&oacute;vel ', div);
+		        infoBubble.addTab(' Imagem ', "<img src='"+this.imovel.getImgDestaque()+"' alt='Imagem'>");
+		        
+		        //abre info
+				infoBubble.open(map, this);
+			});
+		}
+
+    	/** toggle */
+		function toggleBounce(marker) {
+			if (marker.getAnimation() != null) {
+			    marker.setAnimation(null);
+			} else {
+			    marker.setAnimation(google.maps.Animation.BOUNCE);
+			}
+		}
+    	
+    	/** inicializa mapa */
+		function initialize() {
+
+			var mapOptions = {
+				zoom : 14,
+				center : new google.maps.LatLng(-30.019481, -51.178136),
+				mapTypeId : google.maps.MapTypeId.ROADMAP,
+				mapTypeControl : true,
+				mapTypeControlOptions : {
+					style : google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+					position : google.maps.ControlPosition.TOP_RIGHT
+				},
+				panControl : false,
+				panControlOptions : {
+					position : google.maps.ControlPosition.TOP_RIGHT
+				},
+				zoomControl : true,
+				zoomControlOptions : {
+					style : google.maps.ZoomControlStyle.LARGE,
+					position : google.maps.ControlPosition.LEFT_TOP
+				},
+				scaleControl : true,
+				scaleControlOptions : {
+					position : google.maps.ControlPosition.TOP_LEFT
+				},
+				streetViewControl : true,
+				streetViewControlOptions : {
+					position : google.maps.ControlPosition.LEFT_TOP
+				}
+			}
+
+			map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+			var drawingManager = new google.maps.drawing.DrawingManager(
+			{
+				//drawingMode : google.maps.drawing.OverlayType.MARKER,
+				drawingControl : true,
+				drawingControlOptions : {
+					position : google.maps.ControlPosition.TOP_CENTER,
+					drawingModes : [
+							//google.maps.drawing.OverlayType.MARKER,
+							google.maps.drawing.OverlayType.CIRCLE
+							//google.maps.drawing.OverlayType.POLYGON,
+							//google.maps.drawing.OverlayType.POLYLINE,
+							//google.maps.drawing.OverlayType.RECTANGLE
+					]
+				},
+				markerOptions : {
+					icon : '/img/markers/home-E.png'
+				},
+				circleOptions : {
+					strokeColor : "#ff0000",
+					strokeOpacity : 0.8,
+					strokeWeight : 1,
+					fillColor : "#b0c4de",
+					fillOpacity : 0.50,
+					map : map,
+					radius : 1000, //1km
+					clickable : true,
+					editable : true,
+					zIndex : 1
+				}
+			});
+
+			drawingManager.setMap(map);
+
+			// event handler for drawingManager shapes
+	        function setClickEvent(shape) {
+	             google.maps.event.addListener(shape, 'click', function(){
+	                //Colocar mensaje en Formato Dialgo UI
+	                if(confirm('Desea Eliminar El Punto de Control')){                      
+	                    shape.setMap(null);
+	                    drawingManager.setOptions({
+		                    //drawingMode: google.maps.drawing.OverlayType.MARKER,
+		                    drawingControl: true,
+		                    drawingControlOptions: {
+		                        position: google.maps.ControlPosition.TOP_CENTER,
+		                        drawingModes: [
+		                            google.maps.drawing.OverlayType.CIRCLE
+		                            //google.maps.drawing.OverlayType.POLYGON
+		                        ]
+		                      }
+	                    });
+	                }
+	            });
+	        }
+
+			google.maps.event.addListener(drawingManager,'circlecomplete', function(circle){
+				radius = circle.getRadius();
+		        centro = circle.getCenter();
+		        //document.getElementById("posicion").innerHTML=centro;
+		        //document.getElementById("radio").innerHTML=radius;
+		        alert('click');
+
+		        //circle.setOptions({editable:false}); // <-- **** add this line
+		        //drawingManager.setOptions({
+		          //drawingControl: false
+		        //});
+
+		        google.maps.event.addListener(circle, 'radius_changed', function(){
+		            radius = circle.getRadius();
+		            alert("radius: "+radius);
+		            //document.getElementById("radio").innerHTML=radius;
+		        });
+
+		        google.maps.event.addListener(circle, 'center_changed', function(){
+		            centro = circle.getCenter();
+		            alert("centro: "+centro);
+		            //document.getElementById("posicion").innerHTML=centro;
+
+		        });
+
+		        setClickEvent(circle);
+			});
+		}
+
+		//google.maps.event.addDomListener(window, 'load', initialize);
+	</script>
   </head>
 
   <body>
-
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">Project name</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li class="nav-header">Nav header</li>
-                  <li><a href="#">Separated link</a></li>
-                  <li><a href="#">One more separated link</a></li>
-                </ul>
-              </li>
-            </ul>
-            <form class="navbar-form pull-right">
-              <input class="span2" type="text" placeholder="Email">
-              <input class="span2" type="password" placeholder="Password">
-              <button type="submit" class="btn btn-danger">Sign in</button>
-            </form>
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
-    </div>
-
-    <div class="container">
-
-      <!-- Main hero unit for a primary marketing message or call to action -->
-      <div class="hero-unit">
-        <h1>Hello, world!</h1>
-        <p>This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
-        <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
-      </div>
-
-      <!-- Example row of columns -->
-      <div class="row">
-        <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn btn-info" href="#">View details &raquo;</a></p>
-        </div>
-        <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn btn-warning" href="#">View details &raquo;</a></p>
-       </div>
-        <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-          <p><a class="btn btn-success" href="#">View details &raquo;</a></p>
-        </div>
-      </div>
-
-      <hr>
-
-      <footer>
-        <p>&copy; Company 2012</p>
-      </footer>
-
-    </div> <!-- /container -->
+    <div id="map-canvas"></div>
 
 	<script type="text/javascript" src="/js/jquery.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-affix.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-alert.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-button.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-carousel.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-collapse.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-datepicker.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-dropdown.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-modal.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-scrollspy.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-tab.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-tooltip.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-transition.js"></script>
-	<script type="text/javascript" src="/js/ajax-typeahead.js"></script>
-	<script type="text/javascript" src="/js/bootstrap-inputmask.js"></script>
   </body>
 </html>
