@@ -56,7 +56,7 @@ public class JsoupWebScannerTest {
 	public void testFindAll() {
 		final List<Imovel> findAll = imovelService.findAll();
 		for (final Imovel imovel : findAll) {
-			System.out.println(imovel.getId() + " - " + imovel.getCodigoAnuncio() + " imagens: " + imovel.getImagens().size());
+			System.out.println(imovel.getId() + "|" + imovel.getCodigoAnuncio() + "|" + imovel.getValor() + "|imagens: " + imovel.getImagens().size());
 		}
 		Assert.assertTrue("Imovel can't be null ", findAll.size() > 0);
 	}

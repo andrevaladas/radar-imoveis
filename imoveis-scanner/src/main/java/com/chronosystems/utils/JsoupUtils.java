@@ -4,6 +4,9 @@
 package com.chronosystems.utils;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
@@ -51,8 +54,13 @@ public final class JsoupUtils {
 	 * @return
 	 */
 	public static BigDecimal stringToBigDecimal(final String stringValue) {
-		if (stringValue.matches("-?\\d+(\\.\\d+)?")) {
-			return new BigDecimal(stringValue.replaceAll("\\.", "").replaceAll(",", "."));
+		if (stringValue != null) {
+			//your way short version
+	        final NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+	        try {
+	            final BigDecimal decimal = new BigDecimal(nf.parse(stringValue).toString());
+	            return decimal;
+	        } catch (ParseException e) { }
 		}
 		return BigDecimal.ZERO;
 	}
