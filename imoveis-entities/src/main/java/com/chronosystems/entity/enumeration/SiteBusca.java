@@ -1,6 +1,6 @@
 package com.chronosystems.entity.enumeration;
 
-public enum SiteBusca {
+public enum SiteBusca implements BaseEnum {
 	PENSE_IMOVEIS("Pense Imóveis"), AUXILIADORA("Auxiliadora Predial");
 
 	private String description;

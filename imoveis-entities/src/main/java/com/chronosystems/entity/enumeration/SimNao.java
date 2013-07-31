@@ -1,6 +1,6 @@
 package com.chronosystems.entity.enumeration;
 
-public enum SimNao {
+public enum SimNao implements BaseEnum {
 	S("Sim"), N("Não");
 
 	private String description;

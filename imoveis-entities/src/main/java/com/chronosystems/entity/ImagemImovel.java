@@ -24,7 +24,7 @@ public class ImagemImovel implements Serializable {
 	@Column(nullable = false, length = 255)
 	private String url;
 
-	@Column(nullable = false, length = 255)
+	@Column(length = 255)
 	private String descricao;
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)

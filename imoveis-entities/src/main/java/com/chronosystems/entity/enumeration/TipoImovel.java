@@ -1,6 +1,6 @@
 package com.chronosystems.entity.enumeration;
 
-public enum TipoImovel {
+public enum TipoImovel implements BaseEnum {
 	CA("Casa"), AP("Apartamento"), CO("Comercial"), TE("Terreno"), NA("Desconhecido");
 
 	private String description;

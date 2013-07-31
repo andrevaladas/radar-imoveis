@@ -24,6 +24,7 @@ import com.chronosystems.entity.enumeration.SimNao;
 import com.chronosystems.entity.enumeration.SiteBusca;
 import com.chronosystems.entity.enumeration.TipoImovel;
 import com.chronosystems.entity.enumeration.TipoLocalizacao;
+import com.chronosystems.entity.enumeration.TipoOperacao;
 
 /**
  * Classe Imovel
@@ -49,12 +50,16 @@ public class Imovel implements Serializable {
 	private SiteBusca siteBusca;
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "OPERACAO", nullable = false, length = 2)
+	private TipoOperacao tipoOperacao = TipoOperacao.NA;
+
+	@Enumerated(EnumType.STRING)
 	@Column(name = "TIPO", nullable = false, length = 2)
-	private TipoImovel tipoImovel;
+	private TipoImovel tipoImovel = TipoImovel.NA;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "CATEGORIA", nullable = false, length = 2)
-	private CategoriaImovel categoriaImovel;
+	private CategoriaImovel categoriaImovel = CategoriaImovel.NA;
 
 
 	/** RESUMO */
@@ -99,9 +104,11 @@ public class Imovel implements Serializable {
 
 	@Column(nullable = false, length = 1000)
 	private String endereco;
+	@Column(nullable = false, precision = 15, scale = 9)
 	private BigDecimal latitude;
+	@Column(nullable = false, precision = 15, scale = 9)
 	private BigDecimal longitude;
-	
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "TIPO_LOCALIZACAO", nullable = false, length = 1)
 	private TipoLocalizacao tipoLocalizacao;
@@ -151,6 +158,14 @@ public class Imovel implements Serializable {
 
 	public void setSiteBusca(SiteBusca siteBusca) {
 		this.siteBusca = siteBusca;
+	}
+
+	public TipoOperacao getTipoOperacao() {
+		return tipoOperacao;
+	}
+
+	public void setTipoOperacao(TipoOperacao tipoOperacao) {
+		this.tipoOperacao = tipoOperacao;
 	}
 
 	public TipoImovel getTipoImovel() {
