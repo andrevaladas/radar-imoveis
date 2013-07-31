@@ -113,50 +113,25 @@
 
 			/** click do marker */
 			google.maps.event.addListener($marker, 'click', function(event) {
-				//toggleBounce(this);
 
 				//show info
 				var infoBubble = new InfoBubble({
 					maxWidth: 400,
 					maxHeight: 400
-					/*map: map,
-					content: content,
-					position: event.latLng,
-					shadowStyle: 0,
-					padding: 10,
-					borderRadius: 10,
-					borderWidth: 1,
-					borderColor: '#ccc',
-					backgroundColor: '#fff',
-					maxWidth: 200,
-					maxHeight: 50,
-					arrowSize: 10,
-					arrowPosition: 50,
-					disableAutoPan: true,
-					arrowStyle: 2*/
 			    });
 
 				var div = document.createElement('DIV');
 		        div.innerHTML = this.imovel.mostraValores();
 
-		        //adiciona tabs de informaÃ§Ãµes
+		        //adiciona tabs de informações
 		        infoBubble.addTab(' Im&oacute;vel ', div);
 		        infoBubble.addTab(' Imagem ', "<img src='"+this.imovel.getImgDestaque()+"' alt='Imagem'>");
-		        
+
 		        //abre info
 				infoBubble.open(map, this);
 			});
 		}
 
-    	/** toggle */
-		function toggleBounce(marker) {
-			if (marker.getAnimation() != null) {
-			    marker.setAnimation(null);
-			} else {
-			    marker.setAnimation(google.maps.Animation.BOUNCE);
-			}
-		}
-    	
     	/** inicializa mapa */
 		function initialize() {
 
@@ -192,16 +167,11 @@
 
 			var drawingManager = new google.maps.drawing.DrawingManager(
 			{
-				//drawingMode : google.maps.drawing.OverlayType.MARKER,
 				drawingControl : true,
 				drawingControlOptions : {
 					position : google.maps.ControlPosition.TOP_CENTER,
 					drawingModes : [
-							//google.maps.drawing.OverlayType.MARKER,
 							google.maps.drawing.OverlayType.CIRCLE
-							//google.maps.drawing.OverlayType.POLYGON,
-							//google.maps.drawing.OverlayType.POLYLINE,
-							//google.maps.drawing.OverlayType.RECTANGLE
 					]
 				},
 				markerOptions : {

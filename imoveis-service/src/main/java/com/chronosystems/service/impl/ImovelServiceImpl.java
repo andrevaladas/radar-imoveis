@@ -36,9 +36,13 @@ public class ImovelServiceImpl implements ImovelService {
 	public List<Imovel> findAll() {
 		return imovelDAO.findAll();
 	}
+
+	public List<Imovel> findByQuery(String query) {
+		return imovelDAO.findByQuery(query);
+	}
 	
 	@Override
-	public Imovel find(String codigoAnuncio) {
-		return imovelDAO.find(codigoAnuncio);
+	public Imovel findByCodigoAnuncio(String codigoAnuncio) {
+		return imovelDAO.findByCodigoAnuncio(codigoAnuncio);
 	}
 }

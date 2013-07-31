@@ -13,7 +13,9 @@ public interface ImovelService {
 	Imovel findById(Long id);
 	
 	List<Imovel> findAll();
+	
+	List<Imovel> findByQuery(String query);
 
-	Imovel find(String codigoAnuncio);
+	Imovel findByCodigoAnuncio(String codigoAnuncio);
 
 }

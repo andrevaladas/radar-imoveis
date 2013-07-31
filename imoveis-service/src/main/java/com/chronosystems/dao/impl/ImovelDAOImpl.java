@@ -32,9 +32,15 @@ public class ImovelDAOImpl extends DaoSupport implements ImovelDAO {
 	public List<Imovel> findAll() {
 		return getCurrentSession().createQuery("select distinct i from Imovel i left join fetch i.imagens").list();
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public Imovel find(String codigoAnuncio) {
+	public List<Imovel> findByQuery(String query) {
+		return getCurrentSession().createQuery(query).list();
+	}
+
+	@Override
+	public Imovel findByCodigoAnuncio(String codigoAnuncio) {
 		final Query query = getCurrentSession().createQuery("select distinct i from Imovel i left join fetch i.imagens where i.codigoAnuncio = :codigoAnuncio");
 		query.setParameter("codigoAnuncio", codigoAnuncio);
 		return (Imovel) query.uniqueResult();
