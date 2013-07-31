@@ -1,6 +1,6 @@
 package com.chronosystems.entity.enumeration;
 
-public enum TipoLocalizacao {
+public enum TipoLocalizacao implements BaseEnum {
 	A("Aproximada"), E("Exata");
 
 	private String description;
@@ -9,6 +9,7 @@ public enum TipoLocalizacao {
 		this.description = description;
 	}
 
+	@Override
 	public String getDescription() {
 		return this.description;
 	}

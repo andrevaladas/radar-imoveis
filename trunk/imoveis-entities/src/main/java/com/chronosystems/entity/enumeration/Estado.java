@@ -1,7 +1,7 @@
 package com.chronosystems.entity.enumeration;
 
-public enum Estado {
-	RS("RS"), SC("SC");
+public enum Estado implements BaseEnum {
+	RS("Rio Grande do Sul"), SC("Santa Catarina");
 
 	private String description;
 

@@ -1,9 +1,8 @@
 package com.chronosystems.entity.enumeration;
 /**
  * @author Andre Valadas
- *
  */
-public enum CategoriaImovel {
+public enum CategoriaImovel implements BaseEnum {
 	NO("Novo"), US("Usado"), LA("Lançamento"), NA("Desconhecido");
 
 	private String description;
