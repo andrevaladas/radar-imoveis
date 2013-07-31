@@ -14,9 +14,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
- * Classe utilit�ria do Jsoup
+ * Classe utilitária do Jsoup
  * 
- * @author Andr� Valadas
+ * @author André Valadas
  */
 public final class JsoupUtils {
 
@@ -25,7 +25,7 @@ public final class JsoupUtils {
 			if (isNumber(stringValue)) {
 				return Integer.valueOf(stringValue);
 			} else {
-				//verifica se tem espa�o na string pega primeiro numero ex.: "5 ou mais"
+				//verifica se tem espaço na string pega primeiro numero ex.: "5 ou mais"
 				final int ws = stringValue.indexOf(" ");
 				if (ws > 0) {
 					return Integer.valueOf(stringValue.substring(0, ws));
@@ -66,7 +66,7 @@ public final class JsoupUtils {
 	}
 
 	/**
-	 * Procura o valor da propriedade no javaScript do documento da p�gina
+	 * Procura o valor da propriedade no javaScript do documento da página
 	 * 
 	 * @param doc
 	 * @param property
@@ -88,7 +88,7 @@ public final class JsoupUtils {
 	}
 
 	/**
-	 * Procura o valor da propriedade no javaScript da p�gina
+	 * Procura o valor da propriedade no javaScript da página
 	 * 
 	 * @param scriptText
 	 * @param property
@@ -101,7 +101,6 @@ public final class JsoupUtils {
 			final int endProp = scriptText.indexOf("\"", initProp+1);
 			final String propertyValue = scriptText.substring(initProp+1, endProp).trim();
 			
-			//System.out.println(propertyValue);
 			return propertyValue;
 		}
 		return null;

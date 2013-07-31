@@ -24,6 +24,8 @@ import com.chronosystems.entity.enumeration.Estado;
 import com.chronosystems.entity.enumeration.SiteBusca;
 import com.chronosystems.entity.enumeration.TipoImovel;
 import com.chronosystems.entity.enumeration.TipoLocalizacao;
+import com.chronosystems.entity.enumeration.TipoOperacao;
+import com.chronosystems.filter.WebFilter;
 import com.chronosystems.utils.JsoupUtils;
 import com.google.code.geocoder.Geocoder;
 import com.google.code.geocoder.GeocoderRequestBuilder;
@@ -55,23 +57,23 @@ public class JsoupWebScanner {
 	 * 
 	 * @return the URL to connect
 	 */
-	protected Map<Estado, Map<TipoImovel, String>> getURLConnect() {
+	protected Map<Estado, List<WebFilter>> getURLConnect() {
 
 		/** RS */
-		final Map<TipoImovel, String> buscasRS = new HashMap<>();
-		buscasRS.put(TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/compra/rs/casa");
-		//buscasRS.put(TipoImovel.AP, "http://www.penseimoveis.com.br/rs/lista/compra/rs/apartamento");
-		//buscasRS.put(TipoImovel.CO, "http://www.penseimoveis.com.br/rs/lista/compra/rs/comercial");
-		//buscasRS.put(TipoImovel.TE, "http://www.penseimoveis.com.br/rs/lista/compra/rs/terreno");
+		final List<WebFilter> buscasRS = new ArrayList<>();
+		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/compra/rs/casa"));
+		buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.AP, "http://www.penseimoveis.com.br/rs/lista/compra/rs/apartamento"));
+		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CO, "http://www.penseimoveis.com.br/rs/lista/compra/rs/comercial"));
+		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.TE, "http://www.penseimoveis.com.br/rs/lista/compra/rs/terreno"));
 
 		/** SC */
-		final Map<TipoImovel, String> buscasSC = new HashMap<>();
-		buscasSC.put(TipoImovel.CA, "http://www.penseimoveis.com.br/sc/lista/compra/sc/casa");
-		buscasSC.put(TipoImovel.AP, "http://www.penseimoveis.com.br/sc/lista/compra/sc/apartamento");
-		buscasSC.put(TipoImovel.CO, "http://www.penseimoveis.com.br/sc/lista/compra/sc/comercial");
-		buscasSC.put(TipoImovel.TE, "http://www.penseimoveis.com.br/sc/lista/compra/sc/terreno");
+		final List<WebFilter> buscasSC = new ArrayList<>();
+		buscasSC.add(new WebFilter(TipoOperacao.CO, TipoImovel.CA, "http://www.penseimoveis.com.br/sc/lista/compra/sc/casa"));
+		buscasSC.add(new WebFilter(TipoOperacao.CO, TipoImovel.AP, "http://www.penseimoveis.com.br/sc/lista/compra/sc/apartamento"));
+		buscasSC.add(new WebFilter(TipoOperacao.CO, TipoImovel.CO, "http://www.penseimoveis.com.br/sc/lista/compra/sc/comercial"));
+		buscasSC.add(new WebFilter(TipoOperacao.CO, TipoImovel.TE, "http://www.penseimoveis.com.br/sc/lista/compra/sc/terreno"));
 
-		final Map<Estado, Map<TipoImovel, String>> searchProperties = new HashMap<>();
+		final Map<Estado, List<WebFilter>> searchProperties = new HashMap<>();
 		searchProperties.put(Estado.RS, buscasRS); // Adiciona RS
 		//searchProperties.put(Estado.SC, buscasSC); // Adiciona SC
 
@@ -245,22 +247,22 @@ public class JsoupWebScanner {
 		final ExecutorService executor = Executors.newFixedThreadPool(10);
 
 		try {
-			
+
 			/** properiedades da busca */
-			final Set<Entry<Estado, Map<TipoImovel, String>>> searchProperties = getURLConnect().entrySet();
-			for (final Entry<Estado, Map<TipoImovel, String>> search : searchProperties) {
+			final Set<Entry<Estado, List<WebFilter>>> searchProperties = getURLConnect().entrySet();
+			for (final Entry<Estado, List<WebFilter>> search : searchProperties) {
 
 				/** estado */
 				final Estado estado = search.getKey();
 
 				/** urls da consulta */
-				final Set<Entry<TipoImovel, String>> urls = search.getValue().entrySet();
-				for (final Entry<TipoImovel, String> entry : urls) {
+				final List<WebFilter> urls = search.getValue();
+				for (final WebFilter filter : urls) {
 
 					/** url da listagem paginada */
-					Document doc = Jsoup.parse(new URL(entry.getValue()).openStream(), "ISO-8859-1", entry.getValue());
-					debug(entry.getKey().getDescription());
+					Document doc = Jsoup.parse(new URL(filter.getUrl()).openStream(), "ISO-8859-1", filter.getUrl());
 					debug(estado.getDescription());
+					debug(filter.getUrl());
 
 					/** total de paginas validas para iterar */
 					final Integer totalPages = getTotalPages(doc);
@@ -275,10 +277,10 @@ public class JsoupWebScanner {
 						info("pagina: "+i);
 						/** carrega proxima pagina */
 						if (i > 1) {
-							doc = Jsoup.parse(new URL(entry.getValue()+"?page="+i).openStream(), "ISO-8859-1", entry.getValue()+"?page="+i);
+							doc = Jsoup.parse(new URL(filter.getUrl()+"?page="+i).openStream(), "ISO-8859-1", filter.getUrl()+"?page="+i);
 							//break;
 						}
-						
+
 						/** elements to iterate */
 						final Elements anuncios = getPageElements(doc);
 						for (final Element element : anuncios) {
@@ -293,8 +295,13 @@ public class JsoupWebScanner {
 										imovel.setEstado(estado);
 										imovel.setSiteBusca(getSiteBusca());
 
+										/** tipo operacao */
+										final TipoOperacao tipoOperacao = filter.getTipoOperacao();
+										imovel.setTipoOperacao(tipoOperacao);
+										debug(tipoOperacao.getDescription());
+
 										/** tipo imovel */
-										final TipoImovel tipoImovel = entry.getKey();
+										final TipoImovel tipoImovel = filter.getTipoImovel();
 										imovel.setTipoImovel(tipoImovel);
 										debug(tipoImovel.getDescription());
 
@@ -441,7 +448,17 @@ public class JsoupWebScanner {
 	 * @param imovel
 	 * @param doc
 	 */
-	private void processLocalizacao(final Imovel imovel, final Document doc) {
+	private synchronized void processLocalizacao(final Imovel imovel, final Document doc) {
+		processLocalizacao(imovel, doc, 0);
+	}
+	
+	/**
+	 * Processa localizacao do imovel
+	 * 
+	 * @param imovel
+	 * @param doc
+	 */
+	private synchronized void processLocalizacao(final Imovel imovel, final Document doc, int count) {
 		final String latitude = JsoupUtils.getScriptPropertyValue(doc, "latitude").trim();
 		final String longitude = JsoupUtils.getScriptPropertyValue(doc, "longitude").trim();
 		final String endereco = JsoupUtils.getScriptPropertyValue(doc, "enderecoAlternativo").trim();
@@ -460,6 +477,15 @@ public class JsoupWebScanner {
 				final LatLng location = geometry.getLocation();
 				imovel.setLatitude(location.getLat());
 				imovel.setLongitude(location.getLng());
+			} else {
+				error("localização não encontrada pelo endereço.");
+				if (count < 3) {
+					debug("realizando nova pesquisa no google maps");
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) { }
+					processLocalizacao(imovel, doc, ++count);
+				}
 			}
 			imovel.setTipoLocalizacao(TipoLocalizacao.A);
 		}
@@ -486,9 +512,12 @@ public class JsoupWebScanner {
 
 			final ImagemImovel imagemImovel = new ImagemImovel();
 			imagemImovel.setUrl(absUrl);
-			imagemImovel.setDescricao(descricao);
+			if (!descricao.isEmpty()) {
+				imagemImovel.setDescricao(descricao);
+			}
 			imagemImovel.setImovel(imovel);
 
+			/* adiciona url da imagem */
 			imagensImoveis.add(imagemImovel);
 
 			debug(absUrl);
@@ -515,7 +544,9 @@ public class JsoupWebScanner {
 	 * @param debug
 	 */
 	private void debug(final String debug) {
-		System.out.println("| debug: " + debug);
+		if (!debug.isEmpty()) {
+			System.out.println("| debug: " + debug);
+		}
 	}
 
 	/**
