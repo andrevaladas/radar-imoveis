@@ -14,5 +14,7 @@ public interface ImovelDAO {
 	
 	List<Imovel> findAll();
 	
-	Imovel find(String codigoAnuncio);
+	List<Imovel> findByQuery(String query);
+	
+	Imovel findByCodigoAnuncio(String codigoAnuncio);
 }

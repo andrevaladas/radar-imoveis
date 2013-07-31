@@ -56,7 +56,6 @@
     	<property name="dataSource" ref="dataSource"/>
 		<property name="annotatedClasses">
 			<list>
-				<value>com.chronosystems.entity.Customer</value>
 				<value>com.chronosystems.entity.ImagemImovel</value>
 				<value>com.chronosystems.entity.Imovel</value>
 			</list>

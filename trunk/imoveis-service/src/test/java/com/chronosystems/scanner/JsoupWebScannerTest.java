@@ -38,7 +38,12 @@ public class JsoupWebScannerTest {
 
 		final List<Imovel> result = scanner.getResult();
 		for (Imovel imovel : result) {
-			final Imovel entity = imovelService.find(imovel.getCodigoAnuncio());
+			/** valida se tem localizacao */
+			if (imovel.getLatitude() == null) {
+				continue;
+			}
+
+			final Imovel entity = imovelService.findByCodigoAnuncio(imovel.getCodigoAnuncio());
 			if (entity != null) {
 				imovel.setId(entity.getId());
 				BeanUtils.copyProperties(imovel, entity, new String[]{"id", "imagens", "dataInclusao", "ativo"});
@@ -56,7 +61,24 @@ public class JsoupWebScannerTest {
 	public void testFindAll() {
 		final List<Imovel> findAll = imovelService.findAll();
 		for (final Imovel imovel : findAll) {
-			System.out.println(imovel.getId() + "|" + imovel.getCodigoAnuncio() + "|" + imovel.getValor() + "|imagens: " + imovel.getImagens().size());
+			System.out.println(imovel.getId() + "|" + imovel.getCodigoAnuncio() + "|" + imovel.getLatitude() + "|" + imovel.getLongitude() + "|" + imovel.getValor() + "|imagens: " + imovel.getImagens().size());
+		}
+		Assert.assertTrue("Imovel can't be null ", findAll.size() > 0);
+	}
+
+	@Test
+	public void testFindByQuery() {
+		
+		final StringBuilder query = new StringBuilder();
+		query.append("select count(i) ");
+		query.append("from Imovel i ");
+		//query.append("where i.tipoLocalizacao = 'A'");
+		query.append("group by i.latitude, i.longitude ");
+		//query.append("having count(i) > 4 ");
+
+		final List<Imovel> findAll = imovelService.findByQuery(query.toString());
+		for (final Imovel imovel : findAll) {
+			System.out.println(imovel.getId() + "|" + imovel.getCodigoAnuncio() + "|" + imovel.getLatitude() + "|" + imovel.getLongitude() + "|" + imovel.getValor() + "|imagens: " + imovel.getImagens().size());
 		}
 		Assert.assertTrue("Imovel can't be null ", findAll.size() > 0);
 	}
