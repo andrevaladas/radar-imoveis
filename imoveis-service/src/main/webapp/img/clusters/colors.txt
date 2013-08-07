@@ -1,0 +1,13 @@
+AP
+-------------
+http://mapicons.nicolasmollet.com/markers/media/zoom/?custom_color=143bff
+
+
+CA
+-------------
+http://mapicons.nicolasmollet.com/markers/media/zoom/?custom_color=ffd014
+
+
+CO
+-------------
+http://mapicons.nicolasmollet.com/markers/media/zoom/?custom_color=ff2b2b

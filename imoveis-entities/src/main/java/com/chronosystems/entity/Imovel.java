@@ -44,7 +44,7 @@ public class Imovel implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "CODIGO_ESTADO", nullable = false, length = 2)
 	private Estado estado;
-	
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SITE_BUSCA", nullable = false, length = 20)
 	private SiteBusca siteBusca;
