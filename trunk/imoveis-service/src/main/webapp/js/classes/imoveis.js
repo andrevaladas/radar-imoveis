@@ -71,6 +71,11 @@ function Imovel(){
                '<br/><b>***Tipo Localiza&ccedil;&atilde;o:</b> '+this.getLocalizacao().getTipoLocalizacao().getValue()+
                '<br/><b>***Tipo Localiza&ccedil;&atilde;o:</b> '+this.getLocalizacao().getTipoLocalizacao().getDescription();
     };
+    
+    this.getMarkerIcon=function() {
+    	//CA("Casa"), AP("Apartamento"), CO("Comercial"), TE("Terreno"), NA("Desconhecido");
+    	return '/img/markers/'+this.tipoImovel.getValue()+'-'+this.getLocalizacao().getTipoLocalizacao().getValue()+'.png';
+    };
 
     this.getId=function(){
         return this.id;

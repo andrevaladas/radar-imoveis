@@ -61,10 +61,10 @@ public class JsoupWebScanner {
 
 		/** RS */
 		final List<WebFilter> buscasRS = new ArrayList<>();
-		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/compra/rs/casa"));
+		buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/compra/rs/casa"));
 		buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.AP, "http://www.penseimoveis.com.br/rs/lista/compra/rs/apartamento"));
-		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CO, "http://www.penseimoveis.com.br/rs/lista/compra/rs/comercial"));
-		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.TE, "http://www.penseimoveis.com.br/rs/lista/compra/rs/terreno"));
+		buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CO, "http://www.penseimoveis.com.br/rs/lista/compra/rs/comercial"));
+		buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.TE, "http://www.penseimoveis.com.br/rs/lista/compra/rs/terreno"));
 
 		/** SC */
 		final List<WebFilter> buscasSC = new ArrayList<>();
@@ -242,9 +242,9 @@ public class JsoupWebScanner {
 	/**
 	 * Execute parse html extractor
 	 */
-	public void execute() {
+	public List<Imovel> execute() {
 		/** ThreadPool */
-		final ExecutorService executor = Executors.newFixedThreadPool(10);
+		final ExecutorService executor = Executors.newFixedThreadPool(30);
 
 		try {
 
@@ -278,7 +278,6 @@ public class JsoupWebScanner {
 						/** carrega proxima pagina */
 						if (i > 1) {
 							doc = Jsoup.parse(new URL(filter.getUrl()+"?page="+i).openStream(), "ISO-8859-1", filter.getUrl()+"?page="+i);
-							//break;
 						}
 
 						/** elements to iterate */
@@ -332,6 +331,8 @@ public class JsoupWebScanner {
 				} catch (InterruptedException e) { }
 			}
 		}
+
+		return getResult();
 	}
 
 	/**

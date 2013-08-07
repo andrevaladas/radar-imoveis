@@ -1,0 +1,9 @@
+http://gmaps-samples.googlecode.com/svn/trunk/poly/mymapstoolbar.html
+
+http://gmaps-utility-library-dev.googlecode.com/svn/trunk/geometrycontrols/
+
+http://googlemapsapi.blogspot.com.br/2008/05/love-my-maps-use-its-line-and-shape.html
+
+http://gmaps-utility-library-dev.googlecode.com/svn/trunk/geometrycontrols/examples/test.html
+
+http://gmap3.net/en/pages/19-demo/

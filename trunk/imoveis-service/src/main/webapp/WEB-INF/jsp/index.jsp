@@ -12,15 +12,37 @@
     <meta name="author" content="Chrono Systems">
 
     <link href="https://developers.google.com/maps/documentation/javascript/examples/default.css" rel="stylesheet">
+    <style>
+    	#toggleButton
+		{
+		    height: 20px;
+		    width: 40px;
+		    background-color: Red;
+		    float: right;
+		    margin: 10px;
+		    cursor: pointer;
+		}
+		#toggleBtn
+		{    
+		    float: right;
+		    margin: 10px;
+		    padding: 5px;
+		}
+    </style>
+    
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" language="javascript" type="text/javascript"></script>
+    <!-- script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"></script-->
 
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"></script>
 	<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobubble/src/infobubble.js"></script>
+	<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js"></script> 
 
     <script src="/js/classes/imoveis.js" type="text/javascript"></script>
     <script type="text/javascript">
     	var map;
+    	var $allMarkers = [];
     	var $imoveisList = [];
+    	var $clusterMap = {};
     	var $fullBounds = new google.maps.LatLngBounds();
 
     	$(document).ready(function(){
@@ -32,6 +54,11 @@
 
     		/** adiciona marcadores no mapa */
 			printMarkers();
+
+    		/** adiciona controle de cluster */
+			//applyMarkerCluster();
+    		
+			
     	});
 
     	/** popula dados dos imoveis filtrados */
@@ -93,13 +120,28 @@
 			if ($imoveisList.length > 0) {
 				map.fitBounds($fullBounds);
 			}
-			setTimeout(function(){alert("Total de "+$imoveisList.length+" imoveis encontraos!")},3000);
+			//setTimeout(function(){alert("Total de "+$imoveisList.length+" imoveis encontraos!")},10000);
     	}
 
+    	function addMarkerControls($marker) {
+    		/** zoom control */
+    		$fullBounds.extend($marker.imovel.getLocalizacao().getLatLng());
+			/* markers control */
+			$allMarkers.push($marker);
+
+			/* cluster manager */
+			var maplKey = $marker.imovel.tipoImovel.getValue();
+
+			var maplValues = $clusterMap[maplKey];
+			if (maplValues == null) {
+				maplValues = [];
+			}
+			maplValues.push($marker);
+			$clusterMap[maplKey] = maplValues;
+    	}
+    	
     	/** add marker */
     	function addMarker($imovel) {
-    		/** zoom control */
-    		$fullBounds.extend($imovel.getLocalizacao().getLatLng());
 
 			var $marker = new google.maps.Marker({
 		    	position: $imovel.getLocalizacao().getLatLng(),
@@ -108,8 +150,11 @@
 		    	draggable: false,
 		    	animation: google.maps.Animation.DROP,
 		    	imovel: $imovel,
-		    	icon : '/img/markers/home-'+$imovel.getLocalizacao().getTipoLocalizacao().getValue()+'.png'
+		    	icon : $imovel.getMarkerIcon()
 		  	});
+
+    		/* add markers controls */
+    		addMarkerControls($marker);
 
 			/** click do marker */
 			google.maps.event.addListener($marker, 'click', function(event) {
@@ -176,36 +221,36 @@
 				zoomControl : true,
 				zoomControlOptions : {
 					style : google.maps.ZoomControlStyle.LARGE,
-					position : google.maps.ControlPosition.LEFT_TOP
+					position : google.maps.ControlPosition.TOP_LEFT
 				},
 				scaleControl : true,
 				scaleControlOptions : {
-					position : google.maps.ControlPosition.TOP_LEFT
+					position : google.maps.ControlPosition.RIGHT_BOTTOM	
 				},
 				streetViewControl : true,
 				streetViewControlOptions : {
-					position : google.maps.ControlPosition.LEFT_TOP
+					position : google.maps.ControlPosition.TOP_LEFT
 				}
 			}
 
-			map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+			/** initialize map */
+			map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+			
+			/** initialize left panel */
+			var sliderBoxDiv = document.createElement('div');
+		    var sliderBoxControl = new SliderBox(sliderBoxDiv, map);
+		    sliderBoxDiv.index = -500;
+		    map.controls[google.maps.ControlPosition.TOP_LEFT].push(sliderBoxDiv);
 
+		    /** drawning manager */
 			var drawingManager = new google.maps.drawing.DrawingManager(
 			{
-				//drawingMode : google.maps.drawing.OverlayType.MARKER,
 				drawingControl : true,
 				drawingControlOptions : {
 					position : google.maps.ControlPosition.TOP_CENTER,
 					drawingModes : [
-							//google.maps.drawing.OverlayType.MARKER,
-							google.maps.drawing.OverlayType.CIRCLE
-							//google.maps.drawing.OverlayType.POLYGON,
-							//google.maps.drawing.OverlayType.POLYLINE,
-							//google.maps.drawing.OverlayType.RECTANGLE
+						google.maps.drawing.OverlayType.CIRCLE
 					]
-				},
-				markerOptions : {
-					icon : '/img/markers/home-E.png'
 				},
 				circleOptions : {
 					strokeColor : "#ff0000",
@@ -223,61 +268,225 @@
 
 			drawingManager.setMap(map);
 
-			// event handler for drawingManager shapes
-	        function setClickEvent(shape) {
-	             google.maps.event.addListener(shape, 'click', function(){
-	                //Colocar mensaje en Formato Dialgo UI
-	                if(confirm('Desea Eliminar El Punto de Control')){                      
-	                    shape.setMap(null);
-	                    drawingManager.setOptions({
-		                    //drawingMode: google.maps.drawing.OverlayType.MARKER,
-		                    drawingControl: true,
-		                    drawingControlOptions: {
-		                        position: google.maps.ControlPosition.TOP_CENTER,
-		                        drawingModes: [
-		                            google.maps.drawing.OverlayType.CIRCLE
-		                            //google.maps.drawing.OverlayType.POLYGON
-		                        ]
-		                      }
-	                    });
-	                }
-	            });
-	        }
-
 			google.maps.event.addListener(drawingManager,'circlecomplete', function(circle){
-				radius = circle.getRadius();
-		        centro = circle.getCenter();
-		        //document.getElementById("posicion").innerHTML=centro;
-		        //document.getElementById("radio").innerHTML=radius;
-		        alert('click');
 
-		        //circle.setOptions({editable:false}); // <-- **** add this line
-		        //drawingManager.setOptions({
-		          //drawingControl: false
-		        //});
+				/* confirm dialog */
+		        if(!confirm('Aplicar esse filtro?')) {
+		        	circle.setMap(null);
+		        	return;
+		        }
 
+				/* set to default hand cursor */
+		        drawingManager.setDrawingMode(null);
+
+				/* listeners */
 		        google.maps.event.addListener(circle, 'radius_changed', function(){
-		            radius = circle.getRadius();
-		            alert("radius: "+radius);
-		            //document.getElementById("radio").innerHTML=radius;
+		        	showAllMarkers();
+		        	applyCircleFilter(circle);
 		        });
-
 		        google.maps.event.addListener(circle, 'center_changed', function(){
-		            centro = circle.getCenter();
-		            alert("centro: "+centro);
-		            //document.getElementById("posicion").innerHTML=centro;
-
+		        	showAllMarkers();
+		        	applyCircleFilter(circle);
 		        });
 
-		        setClickEvent(circle);
+		        /* events */
+		        applyDeleteCircleClickEvent(circle);
+		        applyCircleFilter(circle);
 			});
 		}
 
+    	// Marker Cluster
+    	function applyMarkerCluster() {
+    		//CA("Casa"), AP("Apartamento"), CO("Comercial"), TE("Terreno"), NA("Desconhecido");
+    		
+    		/*for(var key in $clusterMap) {
+    			for (var i = 0; i < $clusterMap[key].length; i++) {
+    				var data = $clusterMap[key][i];
+    				alert(data.imovel.getValor());
+    			}
+    		}*/
+    		
+    		var styles = [[{
+    	        url: '/img/clusters/CA.png',
+    	        height: 37,
+    	        width: 32,
+    	        anchor: [22, 0],
+    	        textColor: '#FFFFFF',
+    	        textSize: 10
+    	      }, {
+    	        url: '/img/clusters/CA-1.png',
+    	        height: 37,
+    	        width: 32,
+    	        anchor: [22, 0],
+    	        textColor: '#FFFFFF',
+    	        textSize: 10
+    	      }, {
+    	        url: '/img/clusters/CA-2.png',
+    	        height: 37,
+    	        width: 32,
+    	        anchor: [24, 0],
+    	        textColor: '#808080',
+    	        textSize: 10
+    	      }],
+    	      /** apartments */
+    	      [{
+    	    	url: '/img/clusters/AP.png',
+      	        height: 37,
+      	        width: 32,
+      	        anchor: [22, 0],
+      	        textColor: '#FFFFFF',
+      	        textSize: 10
+      	      }, {
+      	        url: '/img/clusters/AP-1.png',
+      	        height: 37,
+      	        width: 32,
+      	        anchor: [22, 0],
+      	        textColor: '#FFFFFF',
+      	        textSize: 10
+      	      }, {
+      	        url: '/img/clusters/AP-2.png',
+      	        height: 37,
+      	        width: 32,
+      	        anchor: [24, 0],
+      	        textColor: '#808080',
+      	        textSize: 10
+      	      }]];
+
+    		var halfMarkers = $allMarkers.length / 2;
+    		var houses = $allMarkers.slice(0, halfMarkers);
+    		var apartments = $allMarkers.slice(halfMarkers, $allMarkers.length);
+
+    		var markerCluster = new MarkerClusterer(map, houses, {
+    			title: ' Casas encontradas nessa regiao',
+    	    	//maxZoom: zoom,
+    	        //gridSize: size,
+    	        styles: styles[0]
+			});
+        	google.maps.event.addListener(markerCluster, 'clusterclick', 
+        		function(cluster) { 
+        			var clickedMakrers = cluster.getMarkers(); 
+        	  		alert("casas: "+cluster.getMarkers().length);
+        		}
+        	);
+        	
+        	markerCluster = new MarkerClusterer(map, apartments, {
+        		title: apartments.length+' Apartamentos encontrados nessa regiao',
+    	    	//maxZoom: zoom,
+    	        //gridSize: size,
+    	        styles: styles[1]
+			});
+        	google.maps.event.addListener(markerCluster, 'clusterclick', 
+        		function(cluster) { 
+        			var clickedMakrers = cluster.getMarkers(); 
+        	  		alert("apartamentos: "+cluster.getMarkers().length);
+        		}
+        	);
+    	}
+    	
+		// event handler for drawingManager shapes
+        function applyDeleteCircleClickEvent(shape) {
+             google.maps.event.addListener(shape, 'click', function(){
+                //Coloca mansagem em formato Dialog UI
+                if(confirm('Deseja excluir esse filtro?')) {
+                    shape.setMap(null);
+                    drawingManager.setOptions({
+	                    //drawingMode: google.maps.drawing.OverlayType.MARKER,
+	                    drawingControl: true,
+	                    drawingControlOptions: {
+	                        position: google.maps.ControlPosition.TOP_CENTER,
+	                        drawingModes: [
+	                            google.maps.drawing.OverlayType.CIRCLE
+	                            //google.maps.drawing.OverlayType.POLYGON
+	                        ]
+	                      }
+                    });
+
+                    /* show all markers again */
+                    showAllMarkers();
+                }
+            });
+        }
+    	
+    	function applyCircleFilter(circle) {
+    		var bounds = circle.getBounds();
+    		var center = circle.getCenter();
+    		var radius = circle.getRadius();
+    		for( i=0;i<$allMarkers.length; i++ ) {
+    			var latLng = $allMarkers[i].position;
+    			if (bounds.contains(latLng) && google.maps.geometry.spherical.computeDistanceBetween(center, latLng) <= radius) {
+    				
+    			} else {
+    				$allMarkers[i].setMap(null);
+    			}
+    		}
+    	}
+    	
+    	function showAllMarkers() {
+    		for( i=0;i<$allMarkers.length; i++ ) {
+				$allMarkers[i].setMap(map);
+    		}
+    	}
 		//google.maps.event.addDomListener(window, 'load', initialize);
+
+		function SliderBox(controlDiv, map) {
+
+		    var control = this;
+		    control.isOpen = true;
+
+		    var box = document.createElement('div');
+		    box.id = 'sliderbox';
+		    box.style.height = '500px';
+		    box.style.width = '200px';
+		    box.style.backgroundColor = 'white';
+		    box.style.opacity = '0.7';
+		    controlDiv.appendChild(box);   
+
+		    var estadoLabel = document.createElement('div');
+		    estadoLabel.innerHTML = 'Estado';
+		    box.appendChild(estadoLabel);
+
+		    var estadoInput = document.createElement('input');
+		    estadoInput.id = 'estado';
+		    estadoInput.type = 'text';
+		    estadoInput.value = 'RS';
+		    box.appendChild(estadoInput);
+
+		    var toggleBtn = document.createElement('input');
+		    toggleBtn.id = 'toggleBtn';
+		    toggleBtn.type = 'button';
+		    toggleBtn.value = 'Close';
+		    box.appendChild(toggleBtn);
+
+		    $('#toggleBtn').live('click', function() {
+		        if (control.isOpen) {
+		            $("#sliderbox").animate({
+		                "marginLeft": "-=150px"
+		            }, {
+		                duration: 500,
+		                step: function() {
+		                    google.maps.event.trigger(map, 'resize');
+		                }
+		            });
+		            control.isOpen = false;
+		            toggleBtn.value = 'Open';
+		        } else {
+		            $("#sliderbox").animate({
+		                "marginLeft": "+=150px"
+		            }, {
+		                duration: 500,
+		                step: function() {
+		                    google.maps.event.trigger(map, 'resize');
+		                }
+		            });
+		            control.isOpen = true;
+		            toggleBtn.value = 'Close';
+		        };
+		    });
+		}
 	</script>
   </head>
 
   <body>
-    <div id="map-canvas"></div>
+    <div id="map_canvas"></div>
   </body>
 </html>

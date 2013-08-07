@@ -1,0 +1,2 @@
+
+http://stackoverflow.com/questions/14166546/google-maps-drawing-manager-limit-to-1-polygon
