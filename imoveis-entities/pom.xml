@@ -20,7 +20,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-orm</artifactId>
 			<version>3.2.3.RELEASE</version>
-			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 
