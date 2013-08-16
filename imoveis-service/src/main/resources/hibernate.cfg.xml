@@ -6,6 +6,8 @@
     <session-factory>
 		<mapping class="com.chronosystems.entity.ImagemImovel"/>
       	<mapping class="com.chronosystems.entity.Imovel"/>
+      	<mapping class="com.chronosystems.entity.Cidade"/>
+      	<mapping class="com.chronosystems.entity.Bairro"/>
     </session-factory>
 	    
 </hibernate-configuration>
