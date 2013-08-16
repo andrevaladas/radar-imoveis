@@ -22,7 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.chronosystems.entity.Bairro;
+import com.chronosystems.entity.Cidade;
 import com.chronosystems.entity.Imovel;
+import com.chronosystems.service.BairroService;
+import com.chronosystems.service.CidadeService;
 import com.chronosystems.service.ImovelService;
 
 /**
@@ -38,6 +42,12 @@ public class JsoupWebScannerTest {
 	
 	@Autowired
 	private ImovelService imovelService;
+
+	@Autowired
+	private CidadeService cidadeService;
+
+	@Autowired
+	private BairroService bairroService;
 
 	@Test
 	public void testExecuteScanner() {
@@ -56,6 +66,24 @@ public class JsoupWebScannerTest {
 					/** valida se tem localizacao */
 					if (!validateImovel(imovel)) {
 						return;
+					}
+
+					/** carrega localização */
+					final Cidade cidade = cidadeService.find(imovel.getEstado(), imovel.getCidade().getDescricao());
+					if (cidade == null) {
+						cidadeService.save(imovel.getCidade());
+					} else {
+						imovel.setCidade(cidade);
+					}
+
+					if (imovel.getBairro() != null) {
+						final Bairro bairro = bairroService.find(imovel.getCidade(), imovel.getBairro().getDescricao());
+						if (bairro == null) {
+							imovel.getBairro().setCidade(imovel.getCidade());
+							bairroService.save(imovel.getBairro());
+						} else {
+							imovel.setBairro(bairro);
+						}
 					}
 
 					/** verifica se existe */
