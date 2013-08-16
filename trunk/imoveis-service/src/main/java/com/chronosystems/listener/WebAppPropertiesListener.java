@@ -12,7 +12,7 @@ import javax.servlet.ServletContextListener;
  * @author André Valadas
  *
  */
-public class WebAppPropertiesListener implements ServletContextListener{
+public class WebAppPropertiesListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {

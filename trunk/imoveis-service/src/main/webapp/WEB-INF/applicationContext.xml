@@ -58,6 +58,8 @@
 			<list>
 				<value>com.chronosystems.entity.ImagemImovel</value>
 				<value>com.chronosystems.entity.Imovel</value>
+				<value>com.chronosystems.entity.Cidade</value>
+				<value>com.chronosystems.entity.Bairro</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">

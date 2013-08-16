@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,7 +15,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -44,6 +48,14 @@ public class Imovel implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "CODIGO_ESTADO", nullable = false, length = 2)
 	private Estado estado;
+	
+	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+	@JoinColumn(name = "ID_CIDADE", nullable = false)
+	private Cidade cidade;
+
+	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+	@JoinColumn(name = "ID_BAIRRO")
+	private Bairro bairro;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SITE_BUSCA", nullable = false, length = 20)
@@ -150,6 +162,22 @@ public class Imovel implements Serializable {
 
 	public void setEstado(Estado estado) {
 		this.estado = estado;
+	}
+
+	public Cidade getCidade() {
+		return cidade;
+	}
+
+	public void setCidade(Cidade cidade) {
+		this.cidade = cidade;
+	}
+
+	public Bairro getBairro() {
+		return bairro;
+	}
+
+	public void setBairro(Bairro bairro) {
+		this.bairro = bairro;
 	}
 
 	public SiteBusca getSiteBusca() {
