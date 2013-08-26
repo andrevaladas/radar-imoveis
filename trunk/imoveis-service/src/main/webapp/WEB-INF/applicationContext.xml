@@ -24,6 +24,15 @@
 	<tx:annotation-driven transaction-manager="transactionManager"/>
 	<mvc:annotation-driven />
 
+	<bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"></bean>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="jacksonMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
     <bean id="messageSource"
 		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basename" value="classpath:messages" />
@@ -74,8 +83,7 @@
 	</bean>
 
 	<!-- map all requests to /resources/** to the container default servlet (ie, don't let Spring handle them) -->
-	<bean id="defaultServletHttpRequestHandler"
-		class="org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler" />
+	<bean id="defaultServletHttpRequestHandler" class="org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler" />
 
 	<bean id="simpleUrlHandlerMapping"
 		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
   <wb-module deploy-name="device-service">
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <dependent-module archiveName="imoveis-scanner-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/imoveis-scanner/imoveis-scanner">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -8,11 +11,5 @@
         </dependent-module>
     <property name="java-output-path" value="/target/classes"/>
         <property name="context-root" value="/"/>
-    <wb-resource deploy-path="/WEB-INF/classes" source-path="src/main/java"/>
-    <wb-resource deploy-path="/WEB-INF/classes" source-path="src/main/resources"/>
-<wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-<wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
   </wb-module>
 </project-modules>

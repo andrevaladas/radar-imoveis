@@ -28,13 +28,8 @@ import com.chronosystems.entity.enumeration.TipoOperacao;
 import com.chronosystems.filter.WebFilter;
 import com.chronosystems.geocoder.GeocoderHelper;
 import com.chronosystems.utils.JsoupUtils;
-import com.google.code.geocoder.Geocoder;
-import com.google.code.geocoder.GeocoderRequestBuilder;
-import com.google.code.geocoder.model.GeocodeResponse;
 import com.google.code.geocoder.model.GeocoderGeometry;
-import com.google.code.geocoder.model.GeocoderRequest;
 import com.google.code.geocoder.model.GeocoderResult;
-import com.google.code.geocoder.model.GeocoderStatus;
 import com.google.code.geocoder.model.LatLng;
 
 /**
@@ -62,10 +57,21 @@ public class JsoupWebScanner {
 
 		/** RS */
 		final List<WebFilter> buscasRS = new ArrayList<>();
-		buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/compra/rs/casa"));
+
+		/** COMPRA */
+		buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/compra/rs/?pais=Brasil&Tipo+de+im%F3vel=Casa&avancada=true"));
+		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/compra/rs/casa"));
+		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.AP, "http://www.penseimoveis.com.br/rs/busca/compra/sc?pais=Brasil&avancada=true&Tipo%20de%20im%F3vel=Apartamento"));
 		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.AP, "http://www.penseimoveis.com.br/rs/lista/compra/rs/apartamento"));
 		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.CO, "http://www.penseimoveis.com.br/rs/lista/compra/rs/comercial"));
 		//buscasRS.add(new WebFilter(TipoOperacao.CO, TipoImovel.TE, "http://www.penseimoveis.com.br/rs/lista/compra/rs/terreno"));
+
+		/** ALUGUEL */
+		/** http://www.penseimoveis.com.br/rs/lista/aluguel/rs/?pais=Brasil&Tipo+de+im%F3vel=Apartamento&avancada=true */
+		//buscasRS.add(new WebFilter(TipoOperacao.AL, TipoImovel.CA, "http://www.penseimoveis.com.br/rs/lista/aluguel/rs/casa"));
+		//buscasRS.add(new WebFilter(TipoOperacao.AL, TipoImovel.AP, "http://www.penseimoveis.com.br/rs/lista/aluguel/rs/apartamento"));
+		//buscasRS.add(new WebFilter(TipoOperacao.AL, TipoImovel.CO, "http://www.penseimoveis.com.br/rs/lista/aluguel/rs/comercial"));
+		//buscasRS.add(new WebFilter(TipoOperacao.AL, TipoImovel.TE, "http://www.penseimoveis.com.br/rs/lista/aluguel/rs/terreno"));
 
 		/** SC */
 		final List<WebFilter> buscasSC = new ArrayList<>();
@@ -81,6 +87,13 @@ public class JsoupWebScanner {
 		return searchProperties;
 	}
 
+	/**
+	 * @return the site to search
+	 */
+	protected SiteBusca getSiteBusca() {
+		return SiteBusca.PENSE_IMOVEIS;
+	}
+	
 	/**
 	 * Total de registros para processar
 	 * 
@@ -110,13 +123,6 @@ public class JsoupWebScanner {
 	protected boolean validateElementToProcess(final Element element) {
 		final Elements valorElement = element.select(".anuncioListaValoresValor");
 		return valorElement != null && !valorElement.isEmpty();
-	}
-
-	/**
-	 * @return the site to search
-	 */
-	protected SiteBusca getSiteBusca() {
-		return SiteBusca.PENSE_IMOVEIS;
 	}
 
 	/**
@@ -275,7 +281,9 @@ public class JsoupWebScanner {
 					for (int i = 1; i < totalPages; i++) {
 						
 						info("total processados: "+result.size());
+						info("==============================================================================");
 						info("pagina: "+i);
+						info("==============================================================================");
 						/** carrega proxima pagina */
 						if (i > 1) {
 							doc = Jsoup.parse(new URL(filter.getUrl()+"?page="+i).openStream(), "ISO-8859-1", filter.getUrl()+"?page="+i);
@@ -466,39 +474,39 @@ public class JsoupWebScanner {
 		final String longitude = JsoupUtils.getScriptPropertyValue(doc, "longitude").trim();
 		final String endereco = JsoupUtils.getScriptPropertyValue(doc, "enderecoAlternativo").trim();
 
+		GeocoderHelper.configureDefaultLocation(imovel);
+
+		/* localizacao exata */
 		if (!latitude.isEmpty()) {
+			imovel.setTipoLocalizacao(TipoLocalizacao.E); //LOCALIZACAO EXATA
 
 			final LatLng location = new LatLng(new BigDecimal(latitude), new BigDecimal(longitude));
 			GeocoderHelper.configureLocation(imovel, location);
-			imovel.setTipoLocalizacao(TipoLocalizacao.E); //EXATA
 		} else {
+			imovel.setTipoLocalizacao(TipoLocalizacao.A); //LOCALIZACAO APROXIMADA
 
-			final Geocoder geocoder = new Geocoder();
-			final GeocoderRequest geocoderRequest = new GeocoderRequestBuilder().setAddress(endereco).setLanguage("pt-BR").getGeocoderRequest();
-			final GeocodeResponse geocoderResponse = geocoder.geocode(geocoderRequest);
-			if (GeocoderStatus.OK.equals(geocoderResponse.getStatus())) {
-
-				final GeocoderResult geocoderResult = geocoderResponse.getResults().get(0);
+			/* localizacao aproximada */
+			final GeocoderResult geocoderResult = GeocoderHelper.getGeocoderResult(endereco);
+			if (geocoderResult != null) {
 				final GeocoderGeometry geometry = geocoderResult.getGeometry();
 				final LatLng location = geometry.getLocation();
 				GeocoderHelper.configureLocation(imovel, location);
-				imovel.setTipoLocalizacao(TipoLocalizacao.A); //APROXIMADA
 			} else {
-				error("localização não encontrada pelo endereço.");
+				/*error("localização não encontrada pelo endereço.");
 				if (count < 3) {
 					debug("realizando nova pesquisa no google maps");
 					try {
 						Thread.sleep(3000);
 					} catch (InterruptedException e) { }
 					processLocalizacao(imovel, doc, ++count);
-				}
+				}*/
 			}
 			imovel.setEndereco(endereco);
 		}
 
-		debug(latitude);
-		debug(longitude);
-		debug(endereco);
+		debug(imovel.getLatitude().toString());
+		debug(imovel.getLongitude().toString());
+		debug(imovel.getEndereco());
 	}
 
 	/**

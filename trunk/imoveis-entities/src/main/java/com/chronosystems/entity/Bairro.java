@@ -15,7 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 /**
- * @author André Valadas
+ * @author AndrÃ© Valadas
  */
 @Entity
 public class Bairro implements Serializable {
@@ -30,7 +30,7 @@ public class Bairro implements Serializable {
 	@Column(nullable = false, length = 255)
 	private String descricao;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = javax.persistence.CascadeType.ALL)
 	@JoinColumn(name = "ID_CIDADE", nullable = false)
 	private Cidade cidade;
 

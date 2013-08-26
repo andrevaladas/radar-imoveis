@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,7 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -49,11 +47,11 @@ public class Imovel implements Serializable {
 	@Column(name = "CODIGO_ESTADO", nullable = false, length = 2)
 	private Estado estado;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
-	@JoinColumn(name = "ID_CIDADE", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = javax.persistence.CascadeType.ALL)
+	@JoinColumn(name = "ID_CIDADE", nullable = true)
 	private Cidade cidade;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = javax.persistence.CascadeType.ALL)
 	@JoinColumn(name = "ID_BAIRRO")
 	private Bairro bairro;
 
@@ -63,15 +61,15 @@ public class Imovel implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "OPERACAO", nullable = false, length = 2)
-	private TipoOperacao tipoOperacao = TipoOperacao.NA;
+	private TipoOperacao tipoOperacao = TipoOperacao.XX;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "TIPO", nullable = false, length = 2)
-	private TipoImovel tipoImovel = TipoImovel.NA;
+	private TipoImovel tipoImovel = TipoImovel.XX;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "CATEGORIA", nullable = false, length = 2)
-	private CategoriaImovel categoriaImovel = CategoriaImovel.NA;
+	private CategoriaImovel categoriaImovel = CategoriaImovel.XX;
 
 
 	/** RESUMO */
@@ -142,7 +140,7 @@ public class Imovel implements Serializable {
 	@Column(name = "ATIVO", nullable = false, length = 1)
 	private SimNao ativo = SimNao.S;
 
-	@OneToMany(mappedBy = "imovel", fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "imovel", fetch = FetchType.EAGER, cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)
 	private Set<ImagemImovel> imagens = new HashSet<ImagemImovel>(0);
 
 	public Imovel() {

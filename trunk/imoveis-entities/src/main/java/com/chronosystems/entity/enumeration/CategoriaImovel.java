@@ -3,7 +3,7 @@ package com.chronosystems.entity.enumeration;
  * @author Andre Valadas
  */
 public enum CategoriaImovel implements BaseEnum {
-	NO("Novo"), US("Usado"), LA("Lançamento"), NA("Desconhecido");
+	NO("Novo"), US("Usado"), LA("Lançamento"), XX("Outros");
 
 	private String description;
 	private CategoriaImovel(final String description) {
@@ -25,6 +25,6 @@ public enum CategoriaImovel implements BaseEnum {
 		}
 
 		System.out.println("| WARN: CategoriaImovel não encontrado para a descrição: " + description);
-        return NA;
+        return XX;
     }
 }

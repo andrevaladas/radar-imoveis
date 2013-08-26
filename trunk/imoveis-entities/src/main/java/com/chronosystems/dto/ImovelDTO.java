@@ -6,8 +6,6 @@ package com.chronosystems.dto;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import org.springframework.beans.BeanUtils;
-
 import com.chronosystems.entity.Imovel;
 
 /**
@@ -15,7 +13,7 @@ import com.chronosystems.entity.Imovel;
  */
 public class ImovelDTO extends Imovel {
 
-	private static final long serialVersionUID = -3751383696570001447L;
+	private static final long serialVersionUID = 641587227582774812L;
 
 	private static final NumberFormat decimal = NumberFormat.getInstance(new Locale("pt", "BR"));
 	private static final NumberFormat currency = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
@@ -25,7 +23,43 @@ public class ImovelDTO extends Imovel {
 	 */
 	public ImovelDTO(final Imovel owner) {
 		super();
-		BeanUtils.copyProperties(owner, this);
+		
+		setId(owner.getId());
+		setEstado(owner.getEstado());
+		setCidade(owner.getCidade());
+		setBairro(owner.getBairro());
+		setSiteBusca(owner.getSiteBusca());
+		setTipoOperacao(owner.getTipoOperacao());
+		setTipoImovel(owner.getTipoImovel());
+		setCategoriaImovel(owner.getCategoriaImovel());
+		setUrlAnuncio(owner.getUrlAnuncio());
+		setCodigoAnuncio(owner.getCodigoAnuncio());
+		setTituloResumo(owner.getTituloResumo());
+		setCaracteristicasResumo(owner.getCaracteristicasResumo());
+		setDescricaoResumo(owner.getDescricaoResumo());
+		setImgDestaque(owner.getImgDestaque());
+		setAnunciante(owner.getAnunciante());
+		setTelefone(owner.getTelefone());
+		setDormitorios(owner.getDormitorios());
+		setBoxGaragem(owner.getBoxGaragem());
+		setAreaTotal(owner.getAreaTotal());
+		setAreaPrivativa(owner.getAreaPrivativa());
+		setValor(owner.getValor());
+		setEndereco(owner.getEndereco());
+		setLatitude(owner.getLatitude());
+		setLongitude(owner.getLongitude());
+		setTipoLocalizacao(owner.getTipoLocalizacao());
+		setTotalImagens(owner.getTotalImagens());
+		setDataInclusao(owner.getDataInclusao());
+		setDataAlteracao(owner.getDataAlteracao());
+		setAtivo(owner.getAtivo());
+	}
+
+	public String getDescricaoResumo() {
+		if (super.getDescricaoResumo().indexOf("\"") > 0) {
+			setDescricaoResumo(super.getDescricaoResumo().replaceAll("\"", "'"));
+		}
+		return super.getDescricaoResumo();
 	}
 
 	public String getAreaTotalFormatted() {

@@ -9,8 +9,9 @@
 	<name>imoveis-service</name>
 
 	<properties>
+		<m2eclipse.wtp.contextRoot>/</m2eclipse.wtp.contextRoot>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    	<m2eclipse.wtp.contextRoot>/</m2eclipse.wtp.contextRoot>
+		<webapp-directory>C:/dev/servers/apache-tomcat-7.0.35/webapps</webapp-directory>
 	</properties>
 
 	<dependencies>
@@ -18,12 +19,6 @@
 			<groupId>com.chronosystems.scanner</groupId>
 			<artifactId>imoveis-scanner</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
 		</dependency>
 
 		<dependency>
@@ -155,8 +150,106 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<!-- Tomcat -->
+		<profile>
+			<id>tomcat-localhost</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+
+			<properties>
+				<!-- id configurado no settings.xml -->
+				<tomcat-server>tomcat7</tomcat-server>
+				<tomcat-url>http://localhost:8080/manager/text</tomcat-url>
+			</properties>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>tomcat-maven-plugin</artifactId>
+						<configuration>
+							<server>${tomcat-server}</server>
+							<url>${tomcat-url}</url>
+							<path>/</path>
+							<update>true</update>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- TOMCAT 7 http://stackoverflow.com/questions/11684952/tomcat-maven-plugin-using-tomcat-7-tomcatdeploy-works-tomcatundeploy-doesn -->
+		<profile>
+			<id>novo-tomcat</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-clean-plugin</artifactId>
+						<version>2.5</version>
+						<configuration>
+							<filesets>
+								<fileset>
+									<directory>${webapp-directory}/ROOT</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<followSymlinks>false</followSymlinks>
+								</fileset>
+							</filesets>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<version>2.4</version>
+						<configuration>
+							<warName>ROOT</warName>
+							<webappDirectory>${webapp-directory}/ROOT</webappDirectory>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.tomcat.maven</groupId>
+						<artifactId>tomcat7-maven-plugin</artifactId>
+						<version>2.1</version>
+						<configuration>
+							<server>tomcat7</server>
+							<url>http://localhost:8080/manager/text</url>
+							<path>/</path>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>webapp-tomcat</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<version>2.4</version>
+						<configuration>
+							<warName>ROOT</warName>
+							<webappDirectory>${webapp-directory}/ROOT</webappDirectory>
+							<archiveClasses>true</archiveClasses>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<build>
-		<finalName>imoveis-service</finalName>
+		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

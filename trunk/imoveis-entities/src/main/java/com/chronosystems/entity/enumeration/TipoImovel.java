@@ -1,7 +1,7 @@
 package com.chronosystems.entity.enumeration;
 
 public enum TipoImovel implements BaseEnum {
-	CA("Casa"), AP("Apartamento"), CO("Comercial"), TE("Terreno"), NA("Desconhecido");
+	CA("Casa"), AP("Apartamento"), CO("Comercial"), TE("Terreno"), XX("Outros");
 
 	private String description;
 
@@ -24,6 +24,6 @@ public enum TipoImovel implements BaseEnum {
 		}
 
         System.out.println("| WARN: TipoImovel não encontrado para a descrição: " + description);
-        return NA;
+        return XX;
     }
 }
