@@ -9,6 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.chronosystems.dto.ImovelDTO;
 import com.chronosystems.dto.ListImovelDTO;
@@ -52,21 +55,47 @@ public class WebController {
 		return "poc";
 	}
 
-	@RequestMapping("/{estado}/{tipoImovel}/{categoriaImovel}/{tipoLocalizacao}/{limit}")
-	public String query(
-			@PathVariable("estado") final String estado, 
-			@PathVariable("tipoImovel") final String tipoImovel, 
-			@PathVariable("categoriaImovel") final String categoriaImovel, 
-			@PathVariable("tipoLocalizacao") final String tipoLocalizacao, 
-			@PathVariable("limit") final int limit, 
-			final ModelMap model) {
+	@RequestMapping(value="/json/data/{id}", method = RequestMethod.GET)
+	public @ResponseBody ImovelDTO getImovelData(@PathVariable Long id) {
+		return new ImovelDTO(imovelService.findById(id));
+	}
 
+	@RequestMapping(value="/json/list", method = RequestMethod.GET)
+	public @ResponseBody List<ImovelDTO> listJSON() {
+ 
+		final List<ImovelDTO> imoveisDTO = new ArrayList<>(); 
+		final List<Imovel> imoveis = imovelService.findAll();
+		for (final Imovel imovel : imoveis) {
+			imoveisDTO.add(new ImovelDTO(imovel));
+		}
+		
+		return imoveisDTO;
+	}
+
+	@RequestMapping("/query")
+	public @ResponseBody List<ImovelDTO> query(
+		@RequestParam(value = "estado", required = true) String estado,
+		@RequestParam(value = "cidade", required = false) Long cidade,
+		@RequestParam(value = "bairro", required = false) Long bairro,
+
+		@RequestParam(value = "site-busca", required = false) String siteBusca,
+		@RequestParam(value = "tipo-operacao", required = false) String tipoOperacao,
+		@RequestParam(value = "tipo-imovel", required = false) String tipoImovel,
+		@RequestParam(value = "categoria-imovel", required = false) String categoriaImovel,
+		@RequestParam(value = "tipo-localizacao", required = false) String tipoLocalizacao
+	) {
+		
 		final StringBuilder query = new StringBuilder();
 		query.append("select i ");
 		query.append("from Imovel i ");
 		query.append("where i.estado = '").append(estado.toUpperCase()).append("' ");
  
 		/* filters */
+		applyFilter(query, "cidade.id", cidade);
+		applyFilter(query, "bairro.id", bairro);
+
+		applyFilter(query, "siteBusca", siteBusca);
+		applyFilter(query, "tipoOperacao", tipoOperacao);
 		applyFilter(query, "tipoImovel", tipoImovel);
 		applyFilter(query, "categoriaImovel", categoriaImovel);
 		applyFilter(query, "tipoLocalizacao", tipoLocalizacao);
@@ -77,13 +106,15 @@ public class WebController {
 			imoveisDTO.add(new ImovelDTO(imovel));
 		}
 
-		model.addAttribute("imovelList", imoveisDTO);
-		return "index";
+		return imoveisDTO;
 	}
-	
-	private void applyFilter(final StringBuilder query, final String field, final String value) {
+
+	private void applyFilter(final StringBuilder query, final String field, Object value) {
 		if (value != null && !value.equals("*")) {
-			query.append(" and i.").append(field).append(" = '").append(value.toUpperCase()).append("' ");
+			if (value instanceof String) {
+				value = "'"+value+"'";
+			}
+			query.append(" and i.").append(field).append(" = ").append(value).append(" ");
 		}
 	}
 }

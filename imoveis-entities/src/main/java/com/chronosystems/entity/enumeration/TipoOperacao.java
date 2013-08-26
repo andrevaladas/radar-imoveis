@@ -1,7 +1,7 @@
 package com.chronosystems.entity.enumeration;
 
 public enum TipoOperacao implements BaseEnum {
-	CO("Compra"), VE("Venda"), AL("Aluguel"), NA("Desconhecido");
+	CO("Compra"), VE("Venda"), AL("Aluguel"), XX("Outros");
 
 	private String description;
 
@@ -24,6 +24,6 @@ public enum TipoOperacao implements BaseEnum {
 		}
 
         System.out.println("| WARN: TipoOperacao não encontrado para a descrição: " + description);
-        return NA;
+        return XX;
     }
 }

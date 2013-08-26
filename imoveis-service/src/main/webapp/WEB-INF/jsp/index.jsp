@@ -13,37 +13,55 @@
 
     <link href="https://developers.google.com/maps/documentation/javascript/examples/default.css" rel="stylesheet">
     <style>
-    	#toggleButton
+		#rightSide
 		{
-		    height: 20px;
-		    width: 40px;
-		    background-color: Red;
-		    float: right;
-		    margin: 10px;
-		    cursor: pointer;
+		     height: 500px;
+		     width: 200px;
+		     background: black;
+		     float: right;
+		     display: none;    
+		     color: white;
+		     font-size: xx-large;
 		}
-		#toggleBtn
-		{    
-		    float: right;
-		    margin: 10px;
-		    padding: 5px;
+		#click
+		{
+		     height: 25px;
+		     width: 25px;
+		     background: aqua;
+		     float: right;
+		     margin-top: 20px;
 		}
     </style>
-    
+
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" language="javascript" type="text/javascript"></script>
-    <!-- script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"></script-->
+	<!--script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" language="javascript" type="text/javascript"></script-->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"></script>
 
 	<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobubble/src/infobubble.js"></script>
 	<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js"></script> 
 
-    <script src="/js/classes/imoveis.js" type="text/javascript"></script>
+    <script src="/js/classes/imoveis.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/js/component/slider-filter.js" type="text/javascript" charset="UTF-8"></script>
+    <link href="/css/component/slider-filter.css" rel="stylesheet" charset="UTF-8">
+    <link href="/css/loader/loader.css" rel="stylesheet" charset="UTF-8">
+
     <script type="text/javascript">
     	var map;
+    	var markerCluster;
     	var $allMarkers = [];
     	var $imoveisList = [];
     	var $clusterMap = {};
     	var $fullBounds = new google.maps.LatLngBounds();
+
+    	jQuery.ajaxSetup({
+   		  	beforeSend: function() {
+   		    	$('#loader').show();
+   		  	},
+   		  	complete: function(){
+   		    	$('#loader').fadeOut(1000);
+   		  	},
+   		  	success: function() {}
+   		});
 
     	$(document).ready(function(){
     		/** carrega dados da consulta */
@@ -58,9 +76,101 @@
     		/** adiciona controle de cluster */
 			//applyMarkerCluster();
     		
-			
+			$('#click').click(function()
+			{
+			    $("#rightSide").animate({width:'toggle'},500);       
+			});
     	});
 
+    	function filterLocation() {
+    		var $filterData = '';
+    		$('#slider-filter option:selected').each(function(){
+    			if ($(this).val()) {
+	    			if ($filterData) {
+	    				$filterData += '&';
+	    			}
+	    			$filterData += $(this).parent().attr('id') +'='+ $(this).val();
+    			}
+    		});
+
+    		$.ajax({
+    			type: "GET",
+    			url: "${pageContext.request.contextPath}/imoveis/query",
+    			cache: false,
+    			async: true,
+    			contentType: "application/json",
+    			data: $filterData, 
+    			success: function(data){
+    				/*reseta mapa */
+    				map.clearOverlays();
+
+    				if (data.length < 1) {
+    					alert("Nenhum registro encontrado!");
+    					return;
+    				}
+    				/* carrega dados da consulta json */
+    				loadDataImoveisJson(data);
+
+    				/** adiciona marcadores no mapa */
+    				printMarkers();
+
+    				//$('#result').html("First Name:- " + obj.firstName +"Last Name:- " + obj.lastName + "Email:- " + obj.email);
+    			}, 
+    			error: function(){	 
+    				alert('Error while request..'); 
+    			} 
+    		});
+    	}
+
+    	
+    	/** popula dados dos imoveis filtrados */
+    	function loadDataImoveisJson(imoveisList) {
+    		for(var count=0; count<imoveisList.length; count++){
+    			var data = imoveisList[count];
+				// popula objeto imovel
+				var $imovel = new Imovel();
+	
+				//@base
+				$imovel.setId(data.id);
+				$imovel.setEstado(data.estado, data.estado.description);
+				$imovel.setSiteBusca(data.siteBusca, data.siteBusca.description);
+				$imovel.setTipoOperacao(data.tipoOperacao, data.tipoOperacao.description);
+				$imovel.setTipoImovel(data.tipoImovel, data.tipoImovel.description);
+				$imovel.setCategoriaImovel(data.categoriaImovel, data.categoriaImovel.description);
+				//@end
+	
+				//@resumo
+				$imovel.setUrlAnuncio(data.urlAnuncio);
+				$imovel.setCodigoAnuncio(data.codigoAnuncio);
+				$imovel.setTituloResumo(data.tituloResumo);
+				$imovel.setCaracteristicasResumo(data.caracteristicasResumo);
+				$imovel.setDescricaoResumo(data.descricaoResumo);
+				$imovel.setImgDestaque(data.imgDestaque);
+				$imovel.setTotalImagens(data.totalImagens);
+				//@end
+	
+				//@detalhamento
+				$imovel.setAnunciante(data.anunciante);
+				$imovel.setTelefone(data.telefone);
+				$imovel.setDormitorios(data.dormitorios);
+				$imovel.setBoxGaragem(data.boxGaragem);
+				$imovel.setAreaTotal(data.areaTotalFormatted);
+				$imovel.setAreaPrivativa(data.areaPrivativaFormatted);
+				$imovel.setValor(data.valorFormatted);
+				//@end
+	
+				//@localizacao
+				$imovel.getLocalizacao().setEndereco(data.endereco);
+				$imovel.getLocalizacao().setLatitude(data.latitude);
+				$imovel.getLocalizacao().setLongitude(data.longitude);
+				$imovel.getLocalizacao().setTipoLocalizacao(data.tipoLocalizacao, data.tipoLocalizacao.description);
+				//@end
+	
+				//add imovel
+				$imoveisList.push($imovel);
+    		}
+    	}
+    	
     	/** popula dados dos imoveis filtrados */
     	function loadDataImoveis() {
 			<c:forEach items="${imovelList}" var="data" varStatus="status">
@@ -68,39 +178,39 @@
 			var $imovel = new Imovel();
 
 			//@base
-			$imovel.setId('${data.id}');
-			$imovel.setEstado('${data.estado}', '${data.estado.description}');
-			$imovel.setSiteBusca('${data.siteBusca}', '${data.siteBusca.description}');
-			$imovel.setTipoOperacao('${data.tipoOperacao}', '${data.tipoOperacao.description}');
-			$imovel.setTipoImovel('${data.tipoImovel}', '${data.tipoImovel.description}');
-			$imovel.setCategoriaImovel('${data.categoriaImovel}', '${data.categoriaImovel.description}');
+			$imovel.setId("${data.id}");
+			$imovel.setEstado("${data.estado}", "${data.estado.description}");
+			$imovel.setSiteBusca("${data.siteBusca}", "${data.siteBusca.description}");
+			$imovel.setTipoOperacao("${data.tipoOperacao}", "${data.tipoOperacao.description}");
+			$imovel.setTipoImovel("${data.tipoImovel}", "${data.tipoImovel.description}");
+			$imovel.setCategoriaImovel("${data.categoriaImovel}", "${data.categoriaImovel.description}");
 			//@end
 
 			//@resumo
-			$imovel.setUrlAnuncio('${data.urlAnuncio}');
-			$imovel.setCodigoAnuncio('${data.codigoAnuncio}');
-			$imovel.setTituloResumo('${data.tituloResumo}');
-			$imovel.setCaracteristicasResumo('${data.caracteristicasResumo}');
-			$imovel.setDescricaoResumo('${data.descricaoResumo}');
-			$imovel.setImgDestaque('${data.imgDestaque}');
-			$imovel.setTotalImagens('${data.totalImagens}');
+			$imovel.setUrlAnuncio("${data.urlAnuncio}");
+			$imovel.setCodigoAnuncio("${data.codigoAnuncio}");
+			$imovel.setTituloResumo("${data.tituloResumo}");
+			$imovel.setCaracteristicasResumo("${data.caracteristicasResumo}");
+			$imovel.setDescricaoResumo("${data.descricaoResumo}");
+			$imovel.setImgDestaque("${data.imgDestaque}");
+			$imovel.setTotalImagens("${data.totalImagens}");
 			//@end
 
 			//@detalhamento
-			$imovel.setAnunciante('${data.anunciante}');
-			$imovel.setTelefone('${data.telefone}');
-			$imovel.setDormitorios('${data.dormitorios}');
-			$imovel.setBoxGaragem('${data.boxGaragem}');
-			$imovel.setAreaTotal('${data.areaTotalFormatted}');
-			$imovel.setAreaPrivativa('${data.areaPrivativaFormatted}');
-			$imovel.setValor('${data.valorFormatted}');
+			$imovel.setAnunciante("${data.anunciante}");
+			$imovel.setTelefone("${data.telefone}");
+			$imovel.setDormitorios("${data.dormitorios}");
+			$imovel.setBoxGaragem("${data.boxGaragem}");
+			$imovel.setAreaTotal("${data.areaTotalFormatted}");
+			$imovel.setAreaPrivativa("${data.areaPrivativaFormatted}");
+			$imovel.setValor("${data.valorFormatted}");
 			//@end
 
 			//@localizacao
-			$imovel.getLocalizacao().setEndereco('${data.endereco}');
-			$imovel.getLocalizacao().setLatitude('${data.latitude}');
-			$imovel.getLocalizacao().setLongitude('${data.longitude}');
-			$imovel.getLocalizacao().setTipoLocalizacao('${data.tipoLocalizacao}', '${data.tipoLocalizacao.description}');
+			$imovel.getLocalizacao().setEndereco("${data.endereco}");
+			$imovel.getLocalizacao().setLatitude("${data.latitude}");
+			$imovel.getLocalizacao().setLongitude("${data.longitude}");
+			$imovel.getLocalizacao().setTipoLocalizacao("${data.tipoLocalizacao}", "${data.tipoLocalizacao.description}");
 			//@end
 
 			//add imovel
@@ -201,11 +311,11 @@
 			    marker.setAnimation(google.maps.Animation.BOUNCE);
 			}
 		}
-    	
+
     	/** inicializa mapa */
 		function initialize() {
 
-			var mapOptions = {
+			var googleMapOptions = {
 				zoom : 14,
 				center : new google.maps.LatLng(-30.019481, -51.178136),
 				mapTypeId : google.maps.MapTypeId.ROADMAP,
@@ -234,13 +344,29 @@
 			}
 
 			/** initialize map */
-			map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
-			
+			map = new google.maps.Map(document.getElementById('map_canvas'), googleMapOptions);
+
+			/** CLEAR MARKERS */
+			google.maps.Map.prototype.clearOverlays = function() {
+				for( i=0;i<$allMarkers.length; i++ ) {
+					$allMarkers[i].setMap(null);
+	    		}
+	    		$allMarkers = [];
+		
+	    		if (markerCluster != undefined) {
+	    			markerCluster.clearMarkers();
+	    		}
+
+	        	$imoveisList = [];
+	        	$clusterMap = {};
+	        	$fullBounds = new google.maps.LatLngBounds();
+			}
+
 			/** initialize left panel */
-			var sliderBoxDiv = document.createElement('div');
-		    var sliderBoxControl = new SliderBox(sliderBoxDiv, map);
-		    sliderBoxDiv.index = -500;
-		    map.controls[google.maps.ControlPosition.TOP_LEFT].push(sliderBoxDiv);
+			var sliderFilterDiv = document.createElement('div');
+		    var sliderFilterControl = new SliderFilter(sliderFilterDiv, map);
+		    sliderFilterDiv.index = -500;
+		    map.controls[google.maps.ControlPosition.TOP_LEFT].push(sliderFilterDiv);
 
 		    /** drawning manager */
 			var drawingManager = new google.maps.drawing.DrawingManager(
@@ -355,8 +481,8 @@
     		var halfMarkers = $allMarkers.length / 2;
     		var houses = $allMarkers.slice(0, halfMarkers);
     		var apartments = $allMarkers.slice(halfMarkers, $allMarkers.length);
-
-    		var markerCluster = new MarkerClusterer(map, houses, {
+    		
+    		markerCluster = new MarkerClusterer(map, houses, {
     			title: ' Casas encontradas nessa regiao',
     	    	//maxZoom: zoom,
     	        //gridSize: size,
@@ -428,65 +554,15 @@
     	}
 		//google.maps.event.addDomListener(window, 'load', initialize);
 
-		function SliderBox(controlDiv, map) {
-
-		    var control = this;
-		    control.isOpen = true;
-
-		    var box = document.createElement('div');
-		    box.id = 'sliderbox';
-		    box.style.height = '500px';
-		    box.style.width = '200px';
-		    box.style.backgroundColor = 'white';
-		    box.style.opacity = '0.7';
-		    controlDiv.appendChild(box);   
-
-		    var estadoLabel = document.createElement('div');
-		    estadoLabel.innerHTML = 'Estado';
-		    box.appendChild(estadoLabel);
-
-		    var estadoInput = document.createElement('input');
-		    estadoInput.id = 'estado';
-		    estadoInput.type = 'text';
-		    estadoInput.value = 'RS';
-		    box.appendChild(estadoInput);
-
-		    var toggleBtn = document.createElement('input');
-		    toggleBtn.id = 'toggleBtn';
-		    toggleBtn.type = 'button';
-		    toggleBtn.value = 'Close';
-		    box.appendChild(toggleBtn);
-
-		    $('#toggleBtn').live('click', function() {
-		        if (control.isOpen) {
-		            $("#sliderbox").animate({
-		                "marginLeft": "-=150px"
-		            }, {
-		                duration: 500,
-		                step: function() {
-		                    google.maps.event.trigger(map, 'resize');
-		                }
-		            });
-		            control.isOpen = false;
-		            toggleBtn.value = 'Open';
-		        } else {
-		            $("#sliderbox").animate({
-		                "marginLeft": "+=150px"
-		            }, {
-		                duration: 500,
-		                step: function() {
-		                    google.maps.event.trigger(map, 'resize');
-		                }
-		            });
-		            control.isOpen = true;
-		            toggleBtn.value = 'Close';
-		        };
-		    });
-		}
 	</script>
   </head>
 
   <body>
+  	<div id="loader"><img src="/img/loader/drip-loader.gif"/></div>
+  	<div id='rightSide'>
+    	Something here from google
+	</div>
+	<div id='click'> > </div>
     <div id="map_canvas"></div>
   </body>
 </html>

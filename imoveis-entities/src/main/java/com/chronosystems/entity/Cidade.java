@@ -16,7 +16,7 @@ import javax.persistence.Id;
 import com.chronosystems.entity.enumeration.Estado;
 
 /**
- * @author André Valadas
+ * @author AndrÃ© Valadas
  */
 @Entity
 public class Cidade implements Serializable {
