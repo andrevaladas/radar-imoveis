@@ -55,10 +55,10 @@
 
     	jQuery.ajaxSetup({
    		  	beforeSend: function() {
-   		    	$('#loader').show();
+   		    	$('.loading').show();
    		  	},
    		  	complete: function(){
-   		    	$('#loader').fadeOut(1000);
+   		    	$('.loading').fadeOut(1000);
    		  	},
    		  	success: function() {}
    		});
@@ -558,7 +558,7 @@
   </head>
 
   <body>
-  	<div id="loader"><img src="/img/loader/drip-loader.gif"/></div>
+  	<div class="loading"></div>
   	<div id='rightSide'>
     	Something here from google
 	</div>
