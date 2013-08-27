@@ -117,10 +117,13 @@ function SliderFilter(controlDiv, map) {
 		    	});
 
 		    	/** ACAO BOTOES */
-			    $('#toggleButton').click( function() {
+			    $('.toggleButton').click( function() {
 			        if (control.isOpen) {
+			        	
+			        	$('.toggleButton').animate({"marginLeft": "-=232px"}, { duration: 500 });
+
 			            $("#slider-filter").animate({
-			                "marginLeft": "-=150px"
+			                "marginLeft": "-=240px"
 			            }, {
 			                duration: 500,
 			                step: function() {
@@ -128,10 +131,11 @@ function SliderFilter(controlDiv, map) {
 			                }
 			            });
 			            control.isOpen = false;
-			            toggleButton.value = 'Open';
 			        } else {
+			        	$('.toggleButton').animate({"marginLeft": "+=232px"}, { duration: 500 });
+
 			            $("#slider-filter").animate({
-			                "marginLeft": "+=150px"
+			                "marginLeft": "+=240px"
 			            }, {
 			                duration: 500,
 			                step: function() {
@@ -139,11 +143,10 @@ function SliderFilter(controlDiv, map) {
 			                }
 			            });
 			            control.isOpen = true;
-			            toggleButton.value = 'Close';
 			        };
 			    });
 
-			    $('#filterBtn').click( function() {
+			    $('.filterButton').click( function() {
 			    	if ($('#estado').val()) {
 			    		filterLocation();
 			    	} else {
