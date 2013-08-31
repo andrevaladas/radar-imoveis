@@ -13,6 +13,7 @@
 	<modules>
 		<module>../imoveis-entities</module>
 		<module>../imoveis-scanner</module>
+		<module>../imoveis-selenium</module>
 		<module>../imoveis-service</module>
 	</modules>
 
