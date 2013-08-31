@@ -23,6 +23,7 @@ import com.chronosystems.entity.Imovel;
 import com.chronosystems.service.BairroService;
 import com.chronosystems.service.CidadeService;
 import com.chronosystems.service.ImovelService;
+import com.imoveis.selenium.maps.search.AddressFinder;
 
 /**
  * @author Andre Valadas
@@ -49,8 +50,16 @@ public class ImoveisTest {
 		final List<Imovel> imoveis = imovelService.findAll();
 		for (final Imovel imovel : imoveis) {
 			info(imovel.getEndereco());
+			AddressFinder.getInstance().configureLocation(imovel);
+			info(imovel.getLatitude().toString());
+			info(imovel.getLongitude().toString());
+			info(imovel.getEndereco());
+			imovelService.save(imovel);
+			info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
 			//System.out.println(imovel.getId() + "|" + imovel.getCodigoAnuncio() + "|" + imovel.getLatitude() + "|" + imovel.getLongitude() + "|" + imovel.getValor() + "|imagens: " + imovel.getImagens().size());
 		}
+		AddressFinder.getInstance().release();
 		Assert.assertTrue("Imovel can't be null ", imoveis.size() > 0);
 	}
 
