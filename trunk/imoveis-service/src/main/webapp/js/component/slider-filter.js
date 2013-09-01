@@ -89,15 +89,15 @@ function SliderFilter(controlDiv, map) {
 			    		$("<option/>").attr("value", key).text(val).appendTo($("#tipo-operacao"));
 		    	  	});
 			    }).done(function() { 
-		    		$('#tipo-operacao option:eq(1)').prop('selected', true) 
+		    		$('#tipo-operacao option:eq(0)').prop('selected', true) 
 		    	});
 		    	$.getJSON("/get/tipos-imoveis", function (data) {
 			    	$.each(data, function(key, val) {
 			    		console.log( "tipo-imovel: "+key+"|"+val );
 			    		$("<option/>").attr("value", key).text(val).appendTo($("#tipo-imovel"));
 		    	  	});
-			    }).done(function() { 
-		    		$('#tipo-imovel option:eq(1)').prop('selected', true) 
+			    }).done(function() {
+		    		$('#tipo-imovel option:eq(0)').prop('selected', true) 
 		    	});
 		    	$.getJSON("/get/categorias-imoveis", function (data) {
 		    		$.each(data, function(key, val) {
@@ -105,7 +105,7 @@ function SliderFilter(controlDiv, map) {
 		    			$("<option/>").attr("value", key).text(val).appendTo($("#categoria-imovel"));
 		    		});
 		    	}).done(function() { 
-		    		$('#categoria-imovel option:eq(1)').prop('selected', true) 
+		    		$('#categoria-imovel option:eq(0)').prop('selected', true) 
 		    	});
 		    	$.getJSON("/get/tipos-localizacao", function (data) {
 		    		$.each(data, function(key, val) {
@@ -113,7 +113,7 @@ function SliderFilter(controlDiv, map) {
 		    			$("<option/>").attr("value", key).text(val).appendTo($("#tipo-localizacao"));
 		    		});
 		    	}).done(function() { 
-		    		$('#tipo-localizacao option:eq(1)').prop('selected', true) 
+		    		$('#tipo-localizacao option:eq(0)').prop('selected', true) 
 		    	});
 
 		    	/** ACAO BOTOES */
@@ -157,6 +157,6 @@ function SliderFilter(controlDiv, map) {
 		    })
 		    .fail(function() { console.log( "error" ); })
 		    .always(function() { console.log( "complete" ); });
-    	}, 300);
+    	}, 500);
 	});
 }
