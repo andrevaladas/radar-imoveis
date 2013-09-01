@@ -2,9 +2,7 @@
 
 <div id="slider-filter">
 	<div class="label">Estado</div>
-	<select id="estado">
-		<option value="">Selecione</option>
-	</select>
+	<select id="estado"></select>
 	<div class="label">Cidade</div>
 	<select id="cidade">
 		<option value="">Selecione</option>

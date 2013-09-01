@@ -5,7 +5,9 @@ package com.chronosystems.dto;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.Set;
 
+import com.chronosystems.entity.ImagemImovel;
 import com.chronosystems.entity.Imovel;
 
 /**
@@ -53,6 +55,14 @@ public class ImovelDTO extends Imovel {
 		setDataInclusao(owner.getDataInclusao());
 		setDataAlteracao(owner.getDataAlteracao());
 		setAtivo(owner.getAtivo());
+
+		final Set<ImagemImovel> imagens = owner.getImagens();
+		for (ImagemImovel imagemImovel : imagens) {
+			final ImagemImovel imagem = new ImagemImovel();
+			imagem.setUrl(imagemImovel.getUrl());
+			imagem.setDescricao(imagemImovel.getDescricao());
+			getImagens().add(imagem);
+		}
 	}
 
 	public String getDescricaoResumo() {

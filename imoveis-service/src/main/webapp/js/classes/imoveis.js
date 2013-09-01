@@ -26,10 +26,13 @@ function Imovel(){
     var valor;
 
     var localizacao;
+
+    var imagens;
     //@end
 
     //@constructe
     this.localizacao = new Localizacao();
+    this.imagens = []; 
     //@end
 
     //@implementation
@@ -37,6 +40,13 @@ function Imovel(){
         return this.localizacao;
     };
 
+    this.getImagens=function() {
+    	return this.imagens;
+    };
+    this.addImagem=function(url, descricao) {
+    	this.imagens.push(new Imagem(url, descricao));
+    };
+    
     this.mostraValores=function() {
         return '<b>Id:</b> '+this.id+
         	   '<br/><b>Estado:</b> '+this.estado.getValue()+' - '+this.estado.getDescription()+
@@ -270,6 +280,21 @@ function Enum(_value, _description) {
 
 	this.getValue=function(){
         return value;
+    };
+    this.getDescription=function(){
+        return description;
+    };
+}
+
+//ImagemImovel
+function Imagem(_url, _description) {
+
+	//@interface
+	var url = _url;
+	var description = _description;
+
+	this.getUrl=function(){
+        return url;
     };
     this.getDescription=function(){
         return description;

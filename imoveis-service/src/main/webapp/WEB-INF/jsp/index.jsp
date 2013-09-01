@@ -31,10 +31,14 @@
 		     float: right;
 		     margin-top: 20px;
 		}
+		/* This rule is read by Galleria to define the gallery height: */
+        #galleria{height:320px}
+        .galleria-container {
+			background: #dddddd;
+		}
     </style>
 
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
-	<!--script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" language="javascript" type="text/javascript"></script-->
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"></script>
 
 	<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobubble/src/infobubble.js"></script>
@@ -42,6 +46,12 @@
 
     <script src="/js/classes/imoveis.js" type="text/javascript" charset="UTF-8"></script>
     <script src="/js/component/slider-filter.js" type="text/javascript" charset="UTF-8"></script>
+
+    <!-- load Galleria -->
+    <script src="/js/galleria/galleria-1.2.9.js"></script>
+    <!-- load the History plugin, no need for further scripting -->
+    <script src="/js/galleria/plugins/history/galleria.history.js"></script>
+
     <link href="/css/component/slider-filter.css" rel="stylesheet" charset="UTF-8">
     <link href="/css/loader/loader.css" rel="stylesheet" charset="UTF-8">
 
@@ -52,6 +62,9 @@
     	var $imoveisList = [];
     	var $clusterMap = {};
     	var $fullBounds = new google.maps.LatLngBounds();
+    	var $infoBubble;
+    	var $galleria = document.createElement('DIV');
+        $galleria.id = 'galeria';
 
     	jQuery.ajaxSetup({
    		  	beforeSend: function() {
@@ -80,7 +93,19 @@
 			{
 			    $("#rightSide").animate({width:'toggle'},500);       
 			});
+
+			initGalleria();
     	});
+    	
+    	function initGalleria() {
+    	    Galleria.loadTheme('../../js/galleria/themes/classic/galleria.classic.js');
+    	    $($galleria).galleria({
+    	    	autoplay: false,
+    	    	wait: true,
+    	    	width: 400,
+    	    	height: 300 //--I made heights match
+    	    });
+    	}
 
     	function filterLocation() {
     		var $filterData = '';
@@ -158,14 +183,20 @@
 				$imovel.setAreaPrivativa(data.areaPrivativaFormatted);
 				$imovel.setValor(data.valorFormatted);
 				//@end
-	
+
 				//@localizacao
 				$imovel.getLocalizacao().setEndereco(data.endereco);
 				$imovel.getLocalizacao().setLatitude(data.latitude);
 				$imovel.getLocalizacao().setLongitude(data.longitude);
 				$imovel.getLocalizacao().setTipoLocalizacao(data.tipoLocalizacao, data.tipoLocalizacao.description);
+
+				//@imagens
+				for (var i = 0; i < data.imagens.length; i++) {
+    				var imagem = data.imagens[i];
+    				$imovel.addImagem(imagem.url, imagem.descricao);
+				}
 				//@end
-	
+
 				//add imovel
 				$imoveisList.push($imovel);
     		}
@@ -211,6 +242,11 @@
 			$imovel.getLocalizacao().setLatitude("${data.latitude}");
 			$imovel.getLocalizacao().setLongitude("${data.longitude}");
 			$imovel.getLocalizacao().setTipoLocalizacao("${data.tipoLocalizacao}", "${data.tipoLocalizacao.description}");
+
+			//@imagens
+			<c:forEach items="${data.imagens}" var="imagem" varStatus="statusImagem">
+				$imovel.addImagem("${imagem.url}", "${imagem.descricao}");
+			</c:forEach>
 			//@end
 
 			//add imovel
@@ -271,7 +307,7 @@
 				//toggleBounce(this);
 
 				//show info
-				var infoBubble = new InfoBubble({
+				$infoBubble = new InfoBubble({
 					maxWidth: 400,
 					maxHeight: 400
 					/*map: map,
@@ -295,14 +331,37 @@
 		        div.innerHTML = this.imovel.mostraValores();
 
 		        //adiciona tabs de informações
-		        infoBubble.addTab(' Im&oacute;vel ', div);
-		        infoBubble.addTab(' Imagem ', "<img src='"+this.imovel.getImgDestaque()+"' alt='Imagem'>");
-		        
+		        $infoBubble.addTab(' Im&oacute;vel ', div);
+		        $infoBubble.addTab(' Imagens ', $galleria);
+		        $infoBubble.imovel = this.imovel;
+
 		        //abre info
-				infoBubble.open(map, this);
+				$infoBubble.open(map, this);
+				Galleria.get(0).load(getGaleriaImagens($infoBubble.imovel));
+				$infoBubble.load = false;
+
+				$($infoBubble.bubble_).bind("click", function(e) {
+					if (!$infoBubble.load) {
+						//Galleria.get(0).next();
+						//Galleria.get(0).show(0);
+						$infoBubble.load = true;
+						//Galleria.get(0).load(data);
+						//Galleria.get(0).load(getGaleriaImagens($infoBubble.imovel));
+					}
+				});
 			});
 		}
 
+    	function getGaleriaImagens(imovel) {
+        	var $galleria = [];
+        	for (var i = 0; i < imovel.getImagens().length; i++) {
+        		var imagem = imovel.getImagens()[i];
+        		$galleria.push({image: imagem.getUrl()});
+        	}
+        	//console.log($galleria);
+        	return $galleria;
+        };
+    	
     	/** toggle */
 		function toggleBounce(marker) {
 			if (marker.getAnimation() != null) {
